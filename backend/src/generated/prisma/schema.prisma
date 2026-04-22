@@ -1,0 +1,157 @@
+generator client {
+  provider     = "prisma-client-js"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  id                     String         @id @default(cuid())
+  email                  String         @unique(map: "User_email_key")
+  password               String?
+  name                   String?
+  phone                  String?
+  role                   Role           @default(CUSTOMER)
+  isActive               Boolean        @default(true)
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+  emailVerificationToken String?
+  isEmailVerified        Boolean        @default(false)
+  googleId               String?        @unique
+  addresses              Address[]
+  cart                   Cart?
+  orders                 Order[]
+  refreshTokens          RefreshToken[]
+
+  @@map("user")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @db.VarChar(500)
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], map: "refreshtoken_userId_fkey")
+  @@map("refreshtoken")
+}
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  user      User       @relation(fields: [userId], references: [id])
+  items     CartItem[]
+
+  @@map("cart")
+}
+
+model CartItem {
+  id        String         @id @default(cuid())
+  cartId    String
+  variantId String
+  quantity  Int            @default(1)
+  cart      Cart           @relation(fields: [cartId], references: [id])
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+
+  @@index([cartId], map: "cartitem_cartId_fkey")
+  @@index([variantId], map: "cartitem_variantId_fkey")
+  @@map("cartitem")
+}
+
+model Address {
+  id            String  @id @default(cuid())
+  contactName   String
+  contactPhone  String
+  province      String
+  district      String
+  ward          String
+  detailAddress String?
+  isDefault     Boolean @default(false)
+  userId        String
+  user          User    @relation(fields: [userId], references: [id])
+
+  @@index([userId], map: "address_userId_fkey")
+  @@map("address")
+}
+
+model Brand {
+  id       String    @id @default(cuid())
+  name     String    @unique(map: "Brand_name_key")
+  slug     String    @unique(map: "Brand_slug_key")
+  products Product[]
+
+  @@map("brand")
+}
+
+model Product {
+  id          String           @id @default(cuid())
+  name        String
+  slug        String           @unique(map: "Product_slug_key")
+  description String?          @db.Text
+  image       String?
+  brandId     String
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  brand       Brand            @relation(fields: [brandId], references: [id])
+  variants    ProductVariant[]
+
+  @@index([brandId], map: "product_brandId_fkey")
+  @@map("product")
+}
+
+model ProductVariant {
+  id           String      @id @default(cuid())
+  size         Int
+  price        Int
+  currentStock Int         @default(0)
+  productId    String
+  cartItems    CartItem[]
+  orderItems   OrderItem[]
+  product      Product     @relation(fields: [productId], references: [id])
+
+  @@index([productId], map: "productvariant_productId_fkey")
+  @@map("productvariant")
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  userId          String
+  shippingName    String
+  shippingPhone   String
+  shippingAddress String
+  totalAmount     Int
+  status          String      @default("PENDING")
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  user            User        @relation(fields: [userId], references: [id])
+  items           OrderItem[]
+
+  @@index([userId], map: "order_userId_fkey")
+  @@map("order")
+}
+
+model OrderItem {
+  id        String         @id @default(cuid())
+  orderId   String
+  variantId String
+  quantity  Int
+  price     Int
+  order     Order          @relation(fields: [orderId], references: [id])
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+
+  @@index([orderId], map: "orderitem_orderId_fkey")
+  @@index([variantId], map: "orderitem_variantId_fkey")
+  @@map("orderitem")
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+}

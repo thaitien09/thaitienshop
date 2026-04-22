@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #000000; /* Luxury often uses Black as primary */
+  --font-sans: "Inter", "system-ui", "sans-serif";
+}
+
+:root {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+/* Ép thanh Header của Ant Design luôn có màu trắng và chữ đen */
+.ant-layout-header {
+  background: #ffffff !important;
+  border-bottom: 1px solid #f3f4f6 !important;
+  color: #000000 !important;
+  padding: 0 !important;
+  line-height: inherit !important;
+}
+
+/* Ép tất cả Link và Text bên trong Header phải là màu Đen */
+.ant-layout-header a, 
+.ant-layout-header .ant-typography,
+.ant-layout-header .lucide {
+  color: #000000 !important;
+}
+
+.ant-layout-header a:hover {
+  color: #6b7280 !important; /* màu xám khi hover */
+}
+
+/* Admin Dashboard Premium Styling */
+.admin-menu.ant-menu-light {
+  background: transparent !important;
+}
+
+.admin-menu .ant-menu-item {
+  margin-bottom: 8px !important;
+  border-radius: 4px !important;
+  color: #94a3b8 !important; /* text-gray-400 */
+}
+
+.admin-menu .ant-menu-item-selected {
+  background-color: #f8fafc !important; /* bg-gray-50 */
+  color: #000000 !important; /* text-black */
+  font-weight: 700 !important;
+}
+
+.admin-menu .ant-menu-item:hover {
+  background-color: #f8fafc !important;
+  color: #000000 !important;
+}
+
+.admin-menu .ant-menu-item-selected .ant-menu-item-icon {
+  color: #000000 !important;
+}
+
+/* Footer Styling */
+footer h4 {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #000000;
+  margin-bottom: 1.5rem;
+}
+
+footer a {
+  color: #6b7280;
+  transition: color 0.3s;
+}
+
+footer a:hover {
+  color: #000000;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+}

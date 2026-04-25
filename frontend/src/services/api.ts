@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { message } from 'antd';
 
 // Cấu hình URL gốc tại đây để dễ dàng thay đổi khi deploy
-export const BASE_URL = 'http://localhost:3000';
+export const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 export const API_URL = `${BASE_URL}/api`;
 
 const api = axios.create({

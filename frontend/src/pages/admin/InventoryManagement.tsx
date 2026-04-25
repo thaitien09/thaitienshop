@@ -387,11 +387,11 @@ const InventoryManagement: React.FC = () => {
                           }}>
                             <Space split={<Divider type="vertical" />}>
                               <span>
-                                <Text type="secondary" size="small">Giá bán lẻ: </Text>
+                                <Text type="secondary">Giá bán lẻ: </Text>
                                 <Text strong style={{ color: '#52c41a' }}>{product.price.toLocaleString()}đ</Text>
                               </span>
                               <span>
-                                <Text type="secondary" size="small">Lợi nhuận: </Text>
+                                <Text type="secondary">Lợi nhuận: </Text>
                                 <Text strong style={{ color: profit > 0 ? '#1890ff' : '#ff4d4f' }}>
                                   {profit.toLocaleString()}đ
                                 </Text>

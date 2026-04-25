@@ -27,6 +27,7 @@ import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 
 const { Title, Text } = Typography;
+const { Option } = Select;
 
 interface User {
   id: string;
@@ -120,7 +121,7 @@ const UserManagement: React.FC = () => {
           <div>
             <div className="font-bold text-black">{record.name || 'N/A'}</div>
             <div className="text-xs text-gray-400 flex items-center gap-1">
-              <MailOutlined size={10} /> {record.email}
+              <MailOutlined style={{ fontSize: 10 }} /> {record.email}
             </div>
           </div>
         </div>

@@ -26,4 +26,4 @@ COPY --from=build /app/prisma.config.ts ./
 
 EXPOSE 1102
 
-CMD ["npm", "run", "start:prod"]
+CMD ["node", "dist/main.js"]

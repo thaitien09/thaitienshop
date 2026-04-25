@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 
@@ -158,11 +158,11 @@ export class OrderService {
     });
 
     if (!order) {
-      throw new BadRequestException('Không tìm thấy đơn hàng');
+      throw new NotFoundException('Không tìm thấy đơn hàng để hủy');
     }
 
     if (order.userId !== userId) {
-      throw new BadRequestException('Bạn không có quyền hủy đơn hàng này');
+      throw new ForbiddenException('Bạn không có quyền thao tác trên đơn hàng này');
     }
 
     if (order.status !== 'PENDING') {

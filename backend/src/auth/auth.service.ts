@@ -259,10 +259,10 @@ export class AuthService {
       where: { userId, expiresAt: { gt: new Date() } }
     });
 
-    if (!storedToken) throw new UnauthorizedException('Session expired');
+    if (!storedToken) throw new UnauthorizedException('Phiên làm việc đã hết hạn hoặc không tồn tại');
 
     const isMatched = await bcrypt.compare(refreshToken, storedToken.token);
-    if (!isMatched) throw new UnauthorizedException('Invalid Token');
+    if (!isMatched) throw new UnauthorizedException('Token không hợp lệ');
 
     const tokens = await this.getTokens(user.id, user.email, user.role);
     await this.updateRefreshToken(user.id, tokens.refreshToken);
@@ -280,7 +280,7 @@ export class AuthService {
     await this.prisma.refreshToken.deleteMany({
       where: { userId },
     });
-    return { message: 'Logged out successfully' };
+    return { message: 'Đăng xuất thành công' };
   }
 
   // 7. Quên mật khẩu - Gửi mã xác thực

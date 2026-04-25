@@ -287,9 +287,10 @@ export class AuthService {
   // 7. Quên mật khẩu - Gửi mã xác thực
   async forgotPassword(email: string) {
     const user = await this.usersService.findByEmail(email);
-    if (!user) {
-      // Vì lý do bảo mật, chúng ta vẫn báo là đã gửi email ngay cả khi không tìm thấy user
-      return { message: 'Nếu email tồn tại trong hệ thống, mã khôi phục sẽ được gửi đến bạn.' };
+    
+    // Nếu không có user hoặc user chưa xác thực email thì không cho reset mật khẩu
+    if (!user || !user.isEmailVerified) {
+      return { message: 'Nếu email tồn tại và đã được xác thực, mã khôi phục sẽ được gửi đến bạn.' };
     }
 
     const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
@@ -303,9 +304,18 @@ export class AuthService {
       }
     });
 
-    await this.mailService.sendResetPasswordEmail(user.email, user.name || 'Thành viên', resetToken);
-
-    return { message: 'Mã khôi phục đã được gửi đến email của bạn.' };
+    try {
+      this.logger.log(`MÃ KHÔI PHỤC MẬT KHẨU CHO ${user.email} LÀ: ${resetToken}`);
+      await this.mailService.sendResetPasswordEmail(user.email, user.name || 'Thành viên', resetToken);
+      return { message: 'Mã khôi phục đã được gửi đến email của bạn.' };
+    } catch (error) {
+      // Rollback token nếu gửi mail lỗi
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { passwordResetToken: null, passwordResetExpires: null }
+      });
+      throw new BadRequestException('Gửi email khôi phục thất bại. Vui lòng thử lại sau!');
+    }
   }
 
   // 8. Đặt lại mật khẩu mới

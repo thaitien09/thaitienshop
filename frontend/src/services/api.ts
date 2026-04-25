@@ -1,7 +1,11 @@
 import axios from 'axios';
 
+// Cấu hình URL gốc tại đây để dễ dàng thay đổi khi deploy
+export const BASE_URL = 'http://localhost:3000';
+export const API_URL = `${BASE_URL}/api`;
+
 const api = axios.create({
-  baseURL: 'http://localhost:1102/api', // Chỉnh lại theo PORT của Backend bạn
+  baseURL: API_URL,
   timeout: 10000,
 });
 
@@ -23,14 +27,24 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Nếu lỗi 401 và chưa thử refresh
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Nếu lỗi 401 và không phải trang login/register và chưa thử refresh
+    const isAuthPath = originalRequest.url.includes('/auth/login') || originalRequest.url.includes('/auth/register');
+    
+    // Xử lý lỗi 429 (Too Many Requests)
+    if (error.response?.status === 429) {
+      message.error('Bạn thao tác quá nhanh! Vui lòng đợi một lát.');
+      return Promise.reject(error);
+    }
+    
+    if (error.response?.status === 401 && !isAuthPath && !originalRequest._retry) {
       originalRequest._retry = true;
       
       try {
         const refreshToken = localStorage.getItem('refresh_token');
+        if (!refreshToken) throw new Error('No refresh token');
+
         // Gọi API refresh token
-        const res = await axios.post('http://localhost:1102/api/auth/refresh', {}, {
+        const res = await axios.post(`${API_URL}/auth/refresh`, {}, {
             headers: { Authorization: `Bearer ${refreshToken}` }
         });
         
@@ -39,11 +53,10 @@ api.interceptors.response.use(
         localStorage.setItem('access_token', accessToken);
         localStorage.setItem('refresh_token', newRefreshToken);
         
-        // Thử lại request ban đầu với token mới
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
       } catch (refreshError) {
-        // Nếu refresh cũng hỏng thì bắt logout
+        console.error('Refresh token failed:', refreshError);
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         window.location.href = '/login';

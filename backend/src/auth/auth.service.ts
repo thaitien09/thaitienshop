@@ -31,14 +31,15 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    
+
     const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
 
     const user = await this.usersService.create({
       email,
       password: hashedPassword,
       name,
-      emailVerificationToken: verificationToken,
+      isEmailVerified: true, // Mặc định đã xác thực để Demo mượt mà
+      emailVerificationToken: null,
     });
 
     this.mailService.sendWelcomeEmail(user.email, user.name || 'Thành viên mới', verificationToken);
@@ -107,16 +108,52 @@ export class AuthService {
   async login(loginDto: LoginDto) {
     const user = await this.usersService.findByEmail(loginDto.email);
     if (!user) {
-      throw new UnauthorizedException('Email hoặc mật khẩu không chính xác!');
+      throw new UnauthorizedException(USER_MESSAGES.LOGIN_FAILED);
+    }
+
+    // 1. Kiểm tra xem tài khoản có đang bị khóa tạm thời không
+    if (user.lockUntil && user.lockUntil > new Date()) {
+      const remainingMinutes = Math.ceil((user.lockUntil.getTime() - Date.now()) / 60000);
+      throw new UnauthorizedException(`Tài khoản đang bị khóa tạm thời do nhập sai quá nhiều lần. Vui lòng thử lại sau ${remainingMinutes} phút!`);
+    }
+
+    if (user.isActive === false) {
+      throw new UnauthorizedException('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên!');
     }
 
     if (user.password) {
       const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
+
       if (!isPasswordValid) {
-        throw new UnauthorizedException(USER_MESSAGES.WRONG_PASSWORD);
+        // 2. Xử lý khi nhập sai mật khẩu
+        const newFailedAttempts = user.failedLoginAttempts + 1;
+        const updateData: any = { failedLoginAttempts: newFailedAttempts };
+
+        if (newFailedAttempts >= 5) {
+          updateData.lockUntil = new Date(Date.now() + 15 * 60 * 1000); // Khóa 15 phút
+          updateData.failedLoginAttempts = 0; // Reset số lần để sau 15p bắt đầu đếm lại từ đầu
+        }
+
+        await this.prisma.user.update({
+          where: { id: user.id },
+          data: updateData
+        });
+
+        const remaining = 5 - newFailedAttempts;
+        if (remaining > 0) {
+          throw new UnauthorizedException(`Sai mật khẩu! Bạn còn ${remaining} lần thử trước khi tài khoản bị khóa 15 phút.`);
+        } else {
+          throw new UnauthorizedException(`Tài khoản đã bị khóa 15 phút do nhập sai 5 lần!`);
+        }
       }
-    } else {
-      throw new UnauthorizedException('Tài khoản này được đăng ký qua mạng xã hội. Hãy sử dụng Đăng nhập Google!');
+    }
+
+    // 3. Đăng nhập thành công -> Reset trạng thái lỗi
+    if (user.failedLoginAttempts > 0 || user.lockUntil) {
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { failedLoginAttempts: 0, lockUntil: null }
+      });
     }
 
     if (!user.isEmailVerified) {
@@ -186,6 +223,10 @@ export class AuthService {
       throw new UnauthorizedException('Không thể xác thực thông tin người dùng!');
     }
 
+    if (user.isActive === false) {
+      throw new UnauthorizedException('Tài khoản của bạn đã bị khóa!');
+    }
+
     const tokens = await this.getTokens(user.id, user.email, user.role);
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
@@ -203,7 +244,7 @@ export class AuthService {
   // 5. Làm mới Token
   async refresh(userId: string, refreshToken: string) {
     const user = await this.usersService.findOne(userId);
-    if (!user) throw new UnauthorizedException('Access Denied');
+    if (!user || user.isActive === false) throw new UnauthorizedException('Tài khoản đã bị khóa hoặc không tồn tại');
 
     const storedToken = await this.prisma.refreshToken.findFirst({
       where: { userId, expiresAt: { gt: new Date() } }
@@ -233,28 +274,100 @@ export class AuthService {
     return { message: 'Logged out successfully' };
   }
 
-  // 7. Lấy thông tin cá nhân
+  // 7. Quên mật khẩu - Gửi mã xác thực
+  async forgotPassword(email: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      // Vì lý do bảo mật, chúng ta vẫn báo là đã gửi email ngay cả khi không tìm thấy user
+      return { message: 'Nếu email tồn tại trong hệ thống, mã khôi phục sẽ được gửi đến bạn.' };
+    }
+
+    const resetToken = Math.floor(100000 + Math.random() * 900000).toString();
+    const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 phút
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordResetToken: resetToken,
+        passwordResetExpires: expires
+      }
+    });
+
+    await this.mailService.sendResetPasswordEmail(user.email, user.name || 'Thành viên', resetToken);
+
+    return { message: 'Mã khôi phục đã được gửi đến email của bạn.' };
+  }
+
+  // 8. Đặt lại mật khẩu mới
+  async resetPassword(email: string, token: string, newPassword: string) {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        email,
+        passwordResetToken: token,
+        passwordResetExpires: { gt: new Date() }
+      }
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Mã khôi phục không hợp lệ hoặc đã hết hạn!');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        passwordResetToken: null,
+        passwordResetExpires: null
+      }
+    });
+
+    return { message: 'Mật khẩu đã được cập nhật thành công!' };
+  }
+
+  // 10. Đổi mật khẩu (Khi đang đăng nhập)
+  async changePassword(userId: string, oldPass: string, newPass: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user || !user.password) {
+      throw new UnauthorizedException('Không thể thực hiện đổi mật khẩu cho tài khoản này!');
+    }
+
+    const isMatch = await bcrypt.compare(oldPass, user.password);
+    if (!isMatch) {
+      throw new UnauthorizedException('Mật khẩu cũ không chính xác!');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPass, 10);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword }
+    });
+
+    return { message: 'Đổi mật khẩu thành công!' };
+  }
+
+  // 11. Lấy thông tin cá nhân
   async getMe(userId: string) {
     const user = await this.usersService.findOne(userId);
     if (!user) {
-      throw new UnauthorizedException('Người dùng không tồn tại');
+      throw new UnauthorizedException(USER_MESSAGES.USER_NOT_FOUND);
     }
-    const { password: _, ...result } = user;
-    return result;
+    return user;
   }
 
   // --- Helpers ---
   async getTokens(userId: string, email: string, role: string) {
     const [at, rt] = await Promise.all([
       this.jwtService.signAsync(
-        { sub: userId, email, role },
+        { id: userId, email, role },
         {
           secret: this.configService.get<string>('JWT_ACCESS_SECRET'),
           expiresIn: this.configService.get<string>('JWT_ACCESS_EXPIRES_IN'),
         } as any,
       ),
       this.jwtService.signAsync(
-        { sub: userId, email, role },
+        { id: userId, email, role },
         {
           secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
           expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN'),

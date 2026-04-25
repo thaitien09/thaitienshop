@@ -29,7 +29,12 @@ const LoginPage: React.FC = () => {
     } catch (error: any) {
       console.error(error);
       const email = error.response?.data?.email;
-      const errorMsg = error.response?.data?.message || 'Email hoặc mật khẩu không chính xác!';
+      let errorMsg = error.response?.data?.message || 'Tên đăng nhập hoặc mật khẩu không chính xác!';
+      
+      // Nếu errorMsg là mảng (do NestJS validation), lấy phần tử đầu tiên
+      if (Array.isArray(errorMsg)) {
+        errorMsg = errorMsg[0];
+      }
 
       // Nếu lỗi là do chưa xác thực, điều hướng sang trang OTP
       if (email && errorMsg.includes('chưa được xác thực')) {
@@ -53,7 +58,7 @@ const LoginPage: React.FC = () => {
             Đăng nhập
           </Title>
           <Text className="text-gray-400 text-[13px] uppercase tracking-[0.2em]">
-            Tiếp tục hành trình cùng Sneaker Elite
+            Tiếp tục hành trình cùng Thai Tien Shop
           </Text>
         </div>
 

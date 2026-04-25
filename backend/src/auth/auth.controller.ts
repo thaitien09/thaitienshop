@@ -7,11 +7,13 @@ import { LoginDto } from './dto/login.dto';
 import { ResponseMessage } from '../decorators/response-message.decorator';
 import { USER_MESSAGES } from '../constants/messages';
 import { AuthGuard } from './guards/auth.guard';
+import { RefreshGuard } from './guards/refresh.guard';
+import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('Xác thực (Auth)')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   @Get('verify-email')
   @ApiOperation({ summary: 'Xác thực email bằng Token (6 chữ số)' })
@@ -20,7 +22,6 @@ export class AuthController {
     return this.authService.verifyEmail(token);
   }
 
-  // Luồng Google Login (Manual)
   @Get('google-url')
   @ApiOperation({ summary: 'Lấy URL đăng nhập Google (Manual)' })
   async getGoogleUrl() {
@@ -40,6 +41,7 @@ export class AuthController {
   }
 
   @Post('register')
+  @Throttle({ login: { limit: 5, ttl: 900000 } })
   @ApiOperation({ summary: 'Đăng ký tài khoản mới' })
   @ResponseMessage(USER_MESSAGES.REGISTER_SUCCESS)
   @ApiResponse({ status: 201 })
@@ -48,6 +50,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @Throttle({ login: { limit: 5, ttl: 900000 } })
   @ApiOperation({ summary: 'Đăng nhập tài khoản' })
   @ResponseMessage(USER_MESSAGES.LOGIN_SUCCESS)
   @ApiResponse({ status: 200 })
@@ -56,17 +59,17 @@ export class AuthController {
   }
 
   @Post('refresh')
-  @UseGuards(AuthGuard) // <--- SỬ DỤNG GUARD Ở ĐÂY
+  @UseGuards(RefreshGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Làm mới Access Token' })
   async refresh(@Req() req: any) {
-    const userId = req.user.sub;
+    const userId = req.user.id || req.user.sub;
     const refreshToken = req.headers.authorization?.split(' ')[1];
     return this.authService.refresh(userId, refreshToken);
   }
 
   @Post('logout')
-  @UseGuards(AuthGuard) // <--- SỬ DỤNG GUARD Ở ĐÂY
+  @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Đăng xuất' })
   @ResponseMessage(USER_MESSAGES.LOGOUT_SUCCESS)
@@ -74,12 +77,31 @@ export class AuthController {
     return this.authService.logout(req.user.sub);
   }
 
+  @Post('forgot-password')
+  @ApiOperation({ summary: 'Yêu cầu khôi phục mật khẩu' })
+  async forgotPassword(@Body('email') email: string) {
+    return this.authService.forgotPassword(email);
+  }
+
+  @Post('reset-password')
+  @ApiOperation({ summary: 'Đặt lại mật khẩu mới bằng Token' })
+  async resetPassword(@Body() body: any) {
+    return this.authService.resetPassword(body.email, body.token, body.newPassword);
+  }
+
+  @Post('change-password')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Đổi mật khẩu khi đang đăng nhập' })
+  async changePassword(@Req() req: any, @Body() body: any) {
+    return this.authService.changePassword(req.user.sub, body.oldPassword, body.newPassword);
+  }
+
   @Get('me')
-  @UseGuards(AuthGuard) // <--- SỬ DỤNG GUARD Ở ĐÂY
+  @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Lấy thông tin người dùng đang đăng nhập' })
   async getMe(@Req() req: any) {
-    // Thông tin sub (id) nằm trong req.user do Guard giải mã ra
     return this.authService.getMe(req.user.sub);
   }
 }

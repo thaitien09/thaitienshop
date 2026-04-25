@@ -1,4 +1,3 @@
-// src/main.ts
 import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
@@ -6,12 +5,24 @@ import { ValidationPipe, ClassSerializerInterceptor } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Reflector } from '@nestjs/core';
 import { TransformInterceptor } from './interceptors/transform.interceptor';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import helmet from 'helmet';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  // 0. Bật CORS để Frontend gọi được API
-  app.enableCors();
+  // 0. Bảo mật Header bằng Helmet
+  app.use(helmet({
+    crossOriginEmbedderPolicy: false,
+    contentSecurityPolicy: false,
+  }));
+
+  // 0. Bật CORS
+  app.enableCors({
+    origin: '*',
+    credentials: true,
+  });
+
   app.setGlobalPrefix('api');
 
   app.useGlobalPipes(new ValidationPipe({
@@ -26,16 +37,16 @@ async function bootstrap() {
 
   // 3. Cấu hình Swagger 
   const config = new DocumentBuilder()
-    .setTitle('Sneaker Store API')
-    .setDescription('Tài liệu API dành cho dự án Sneaker Store Elite')
+    .setTitle('Thai Tien Shop API')
+    .setDescription('Tài liệu API dành cho hệ thống quản lý cửa hàng sáp vuốt tóc Thai Tien Shop')
     .setVersion('1.0')
     .addBearerAuth()
     .build();
-  
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 
-  const port = process.env.PORT ?? 1102;
+  const port = process.env.PORT || 3000;
   await app.listen(port);
   console.log(`🚀 Server is running on: http://localhost:${port}/api`);
   console.log(`📄 Swagger documentation: http://localhost:${port}/docs`);

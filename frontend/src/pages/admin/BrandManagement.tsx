@@ -35,9 +35,30 @@ interface Brand {
 const BrandManagement: React.FC = () => {
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(false);
+  const [searchText, setSearchText] = useState('');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
   const [form] = Form.useForm();
+
+  // Hàm tạo Slug tự động từ Tên
+  const convertToSlug = (text: string) => {
+    return text
+      .toLowerCase()
+      .normalize('NFD') // Tách dấu
+      .replace(/[\u0300-\u036f]/g, '') // Xóa dấu
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'd')
+      .replace(/[^a-z0-9\s-]/g, '') // Xóa ký tự đặc biệt
+      .replace(/\s+/g, '-') // Thay khoảng trắng bằng -
+      .replace(/-+/g, '-') // Xóa nhiều gạch ngang liền nhau
+      .trim();
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const nameValue = e.target.value;
+    const slugValue = convertToSlug(nameValue);
+    form.setFieldsValue({ slug: slugValue });
+  };
 
   // Fetch brands
   const fetchBrands = async () => {
@@ -118,7 +139,7 @@ const BrandManagement: React.FC = () => {
       title: 'Số sản phẩm',
       key: 'productCount',
       render: (record: Brand) => (
-        <Tag color="cyan">{record._count?.products || 0} sản phẩm</Tag>
+        <Tag color="cyan">{record._count?.products || 0} loại sáp</Tag>
       ),
     },
     {
@@ -157,7 +178,7 @@ const BrandManagement: React.FC = () => {
             <Title level={4} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
               <TagsOutlined /> Quản lý Thương hiệu
             </Title>
-            <Text type="secondary">Quản lý danh sách các hãng giày trong hệ thống của bạn</Text>
+            <Text type="secondary">Quản lý danh sách các hãng sáp trong hệ thống của bạn</Text>
           </div>
           <Button 
             type="primary" 
@@ -169,9 +190,22 @@ const BrandManagement: React.FC = () => {
           </Button>
         </div>
 
+        <div style={{ marginBottom: 16, display: 'flex', gap: 12 }}>
+          <Input.Search
+            placeholder="Tìm tên thương hiệu..."
+            allowClear
+            value={searchText}
+            onChange={e => setSearchText(e.target.value)}
+            style={{ maxWidth: 320 }}
+          />
+          <span style={{ lineHeight: '32px', color: '#888', fontSize: 12 }}>
+            {brands.filter(b => b.name.toLowerCase().includes(searchText.toLowerCase())).length} kết quả
+          </span>
+        </div>
+
         <Table 
           columns={columns} 
-          dataSource={brands} 
+          dataSource={brands.filter(b => b.name.toLowerCase().includes(searchText.toLowerCase()))} 
           rowKey="id" 
           loading={loading}
           pagination={{ pageSize: 10 }}
@@ -196,7 +230,7 @@ const BrandManagement: React.FC = () => {
             label="Tên thương hiệu"
             rules={[{ required: true, message: 'Vui lòng nhập tên thương hiệu!' }]}
           >
-            <Input placeholder="Ví dụ: Nike, Adidas..." />
+            <Input placeholder="Ví dụ: Kevin Murphy, Reuzel..." onChange={handleNameChange} />
           </Form.Item>
 
           <Form.Item
@@ -204,7 +238,7 @@ const BrandManagement: React.FC = () => {
             label="Slug (Đường dẫn)"
             rules={[{ required: true, message: 'Vui lòng nhập slug!' }]}
           >
-            <Input placeholder="Ví dụ: nike, adidas-originals..." />
+            <Input placeholder="Ví dụ: kevin-murphy, reuzel-pomade..." />
           </Form.Item>
 
           <Form.Item style={{ marginBottom: 0, marginTop: '24px', textAlign: 'right' }}>

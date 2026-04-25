@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, ForbiddenException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -31,13 +31,21 @@ export class UsersController {
 
   @Patch(':id')
   @Roles(Role.ADMIN)
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto, @Req() req: any) {
+    // Ngăn Admin tự khóa chính mình
+    if (id === req.user.id && updateUserDto.isActive === false) {
+      throw new ForbiddenException('Bạn không thể tự khóa tài khoản của chính mình!');
+    }
     return this.usersService.update(id, updateUserDto);
   }
 
   @Delete(':id')
   @Roles(Role.ADMIN)
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(id);
+  async remove(@Param('id') id: string, @Req() req: any) {
+    // Ngăn Admin tự xóa chính mình
+    if (id === req.user.id) {
+      throw new ForbiddenException('Bạn không thể tự xóa tài khoản của chính mình!');
+    }
+    return this.usersService.remove(id, req.user.id);
   }
 }

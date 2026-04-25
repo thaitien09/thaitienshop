@@ -29,7 +29,11 @@ export class AuthGuard implements CanActivate {
       });
       
       // Gắn thông tin User vào request để các Controller có thể dùng
-      request['user'] = payload;
+      request['user'] = {
+        ...payload,
+        id: payload.id || payload.sub,
+        sub: payload.sub || payload.id
+      };
     } catch {
       throw new UnauthorizedException('Phiên đăng nhập đã hết hạn!');
     }

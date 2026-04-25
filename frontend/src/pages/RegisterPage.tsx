@@ -37,7 +37,7 @@ const RegisterPage: React.FC = () => {
           </Title>
           <div className="flex flex-col gap-1">
             <Text className="text-gray-400 text-[13px] uppercase tracking-[0.2em]">
-              Khởi đầu hành trình cùng Elite
+              Khởi đầu hành trình cùng Thai Tien Shop
             </Text>
             <div className="w-12 h-1 bg-black mt-2" />
           </div>

@@ -12,7 +12,8 @@ import {
   Bell,
   Search,
   User as UserIcon,
-  ChevronDown
+  ChevronDown,
+  History
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -31,7 +32,8 @@ const AdminLayout: React.FC = () => {
   const menuItems: any[] = [
     { key: '/admin', icon: <BarChart3 size={18} strokeWidth={1.5} />, label: <Link to="/admin" className="text-[13px] font-medium">Bảng điều khiển</Link> },
     { key: '/admin/brands', icon: <Store size={18} strokeWidth={1.5} />, label: <Link to="/admin/brands" className="text-[13px] font-medium">Quản lý thương hiệu</Link> },
-    { key: '/admin/products', icon: <Package size={18} strokeWidth={1.5} />, label: <Link to="/admin/products" className="text-[13px] font-medium">Quản lý sản phẩm</Link> },
+    { key: '/admin/products', icon: <Package size={18} strokeWidth={1.5} />, label: <Link to="/admin/products" className="text-[13px] font-medium">Quản lý sáp vuốt tóc</Link> },
+    { key: '/admin/inventory', icon: <History size={18} strokeWidth={1.5} />, label: <Link to="/admin/inventory" className="text-[13px] font-medium">Quản lý nhập kho</Link> },
     { key: '/admin/orders', icon: <ShoppingCart size={18} strokeWidth={1.5} />, label: <Link to="/admin/orders" className="text-[13px] font-medium">Đơn hàng mới</Link> },
     { key: '/admin/users', icon: <Users size={18} strokeWidth={1.5} />, label: <Link to="/admin/users" className="text-[13px] font-medium">Khách hàng</Link> },
     { key: 'divider-1', type: 'divider', className: "!my-6" },
@@ -48,7 +50,7 @@ const AdminLayout: React.FC = () => {
       >
         <div className="h-20 flex items-center px-8 border-b border-gray-100">
           <div className="flex flex-col">
-            <span className="text-sm font-black tracking-tighter uppercase leading-none">Sneaker<span className="text-gray-400">Elite</span></span>
+            <span className="text-sm font-black tracking-tighter uppercase leading-none">THAI <span className="text-gray-400">TIEN</span></span>
             <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-gray-300 mt-1">Admin Panel</span>
           </div>
         </div>
@@ -110,7 +112,7 @@ const AdminLayout: React.FC = () => {
                 return link === location.pathname;
               })?.label?.props?.children || "Bảng điều khiển"}
             </h1>
-            <p className="text-gray-400 text-sm">Chào mừng bạn đến với hệ thống quản trị Sneaker Elite.</p>
+            <p className="text-gray-400 text-sm">Chào mừng bạn đến với hệ thống quản trị Thai Tien Shop.</p>
           </div>
           <Outlet />
         </Content>

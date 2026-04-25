@@ -132,7 +132,11 @@ exports.Prisma.UserScalarFieldEnum = {
   updatedAt: 'updatedAt',
   emailVerificationToken: 'emailVerificationToken',
   isEmailVerified: 'isEmailVerified',
-  googleId: 'googleId'
+  passwordResetToken: 'passwordResetToken',
+  passwordResetExpires: 'passwordResetExpires',
+  googleId: 'googleId',
+  failedLoginAttempts: 'failedLoginAttempts',
+  lockUntil: 'lockUntil'
 };
 
 exports.Prisma.RefreshTokenScalarFieldEnum = {
@@ -153,7 +157,7 @@ exports.Prisma.CartScalarFieldEnum = {
 exports.Prisma.CartItemScalarFieldEnum = {
   id: 'id',
   cartId: 'cartId',
-  variantId: 'variantId',
+  productId: 'productId',
   quantity: 'quantity'
 };
 
@@ -177,31 +181,35 @@ exports.Prisma.BrandScalarFieldEnum = {
 
 exports.Prisma.ProductScalarFieldEnum = {
   id: 'id',
+  sku: 'sku',
   name: 'name',
   slug: 'slug',
   description: 'description',
   image: 'image',
+  price: 'price',
+  oldPrice: 'oldPrice',
+  costPrice: 'costPrice',
+  currentStock: 'currentStock',
   brandId: 'brandId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.ProductVariantScalarFieldEnum = {
-  id: 'id',
-  size: 'size',
-  price: 'price',
-  currentStock: 'currentStock',
-  productId: 'productId'
-};
-
 exports.Prisma.OrderScalarFieldEnum = {
   id: 'id',
+  orderCode: 'orderCode',
   userId: 'userId',
-  shippingName: 'shippingName',
-  shippingPhone: 'shippingPhone',
-  shippingAddress: 'shippingAddress',
+  customerName: 'customerName',
+  customerPhone: 'customerPhone',
+  customerEmail: 'customerEmail',
+  province: 'province',
+  district: 'district',
+  ward: 'ward',
+  addressDetail: 'addressDetail',
   totalAmount: 'totalAmount',
   status: 'status',
+  paymentMethod: 'paymentMethod',
+  note: 'note',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -209,9 +217,26 @@ exports.Prisma.OrderScalarFieldEnum = {
 exports.Prisma.OrderItemScalarFieldEnum = {
   id: 'id',
   orderId: 'orderId',
-  variantId: 'variantId',
+  productId: 'productId',
   quantity: 'quantity',
-  price: 'price'
+  price: 'price',
+  costPrice: 'costPrice'
+};
+
+exports.Prisma.InventoryReceiptScalarFieldEnum = {
+  id: 'id',
+  note: 'note',
+  totalCost: 'totalCost',
+  createdAt: 'createdAt',
+  userId: 'userId'
+};
+
+exports.Prisma.InventoryReceiptItemScalarFieldEnum = {
+  id: 'id',
+  receiptId: 'receiptId',
+  productId: 'productId',
+  quantity: 'quantity',
+  costPrice: 'costPrice'
 };
 
 exports.Prisma.SortOrder = {
@@ -231,6 +256,7 @@ exports.Prisma.UserOrderByRelevanceFieldEnum = {
   name: 'name',
   phone: 'phone',
   emailVerificationToken: 'emailVerificationToken',
+  passwordResetToken: 'passwordResetToken',
   googleId: 'googleId'
 };
 
@@ -248,7 +274,7 @@ exports.Prisma.CartOrderByRelevanceFieldEnum = {
 exports.Prisma.CartItemOrderByRelevanceFieldEnum = {
   id: 'id',
   cartId: 'cartId',
-  variantId: 'variantId'
+  productId: 'productId'
 };
 
 exports.Prisma.AddressOrderByRelevanceFieldEnum = {
@@ -270,6 +296,7 @@ exports.Prisma.BrandOrderByRelevanceFieldEnum = {
 
 exports.Prisma.ProductOrderByRelevanceFieldEnum = {
   id: 'id',
+  sku: 'sku',
   name: 'name',
   slug: 'slug',
   description: 'description',
@@ -277,24 +304,38 @@ exports.Prisma.ProductOrderByRelevanceFieldEnum = {
   brandId: 'brandId'
 };
 
-exports.Prisma.ProductVariantOrderByRelevanceFieldEnum = {
-  id: 'id',
-  productId: 'productId'
-};
-
 exports.Prisma.OrderOrderByRelevanceFieldEnum = {
   id: 'id',
+  orderCode: 'orderCode',
   userId: 'userId',
-  shippingName: 'shippingName',
-  shippingPhone: 'shippingPhone',
-  shippingAddress: 'shippingAddress',
-  status: 'status'
+  customerName: 'customerName',
+  customerPhone: 'customerPhone',
+  customerEmail: 'customerEmail',
+  province: 'province',
+  district: 'district',
+  ward: 'ward',
+  addressDetail: 'addressDetail',
+  status: 'status',
+  paymentMethod: 'paymentMethod',
+  note: 'note'
 };
 
 exports.Prisma.OrderItemOrderByRelevanceFieldEnum = {
   id: 'id',
   orderId: 'orderId',
-  variantId: 'variantId'
+  productId: 'productId'
+};
+
+exports.Prisma.InventoryReceiptOrderByRelevanceFieldEnum = {
+  id: 'id',
+  note: 'note',
+  userId: 'userId'
+};
+
+exports.Prisma.InventoryReceiptItemOrderByRelevanceFieldEnum = {
+  id: 'id',
+  receiptId: 'receiptId',
+  productId: 'productId'
 };
 exports.Role = exports.$Enums.Role = {
   ADMIN: 'ADMIN',
@@ -309,9 +350,10 @@ exports.Prisma.ModelName = {
   Address: 'Address',
   Brand: 'Brand',
   Product: 'Product',
-  ProductVariant: 'ProductVariant',
   Order: 'Order',
-  OrderItem: 'OrderItem'
+  OrderItem: 'OrderItem',
+  InventoryReceipt: 'InventoryReceipt',
+  InventoryReceiptItem: 'InventoryReceiptItem'
 };
 
 /**

@@ -1,0 +1,35 @@
+name: Deploy Thai Tien Shop to AWS
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # 1. Di chuyển vào thư mục dự án (nếu chưa có thì clone về)
+            if [ ! -d "thaitienshop" ]; then
+              git clone https://github.com/${{ github.repository }}.git thaitienshop
+            fi
+            
+            cd thaitienshop
+            
+            # 2. Cập nhật code mới nhất
+            git pull origin main
+            
+            # 3. Kích nổ Docker Compose V2
+            docker compose up -d --build
+            
+            # 4. Dọn dẹp các Image thừa để tiết kiệm dung lượng (rất quan trọng cho VPS 2GB)
+            docker image prune -f

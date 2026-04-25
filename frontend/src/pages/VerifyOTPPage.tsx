@@ -78,7 +78,7 @@ const VerifyOTPPage: React.FC = () => {
         
         <div className="mb-10">
           <Title level={1} className="!text-[32px] font-black tracking-tighter uppercase !mb-2">
-            Xác thực Elite
+            Xác thực Thai Tien Shop
           </Title>
           <Text className="text-gray-400 text-[13px] leading-relaxed">
             Chúng tôi vừa gửi mã 6 chữ số đến <br/>

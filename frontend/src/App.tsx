@@ -4,9 +4,20 @@ import AdminLayout from './layouts/AdminLayout';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import VerifyOTPPage from './pages/VerifyOTPPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import GoogleCallbackPage from './pages/GoogleCallbackPage';
-import { HomePage, DashboardPage, ProfilePage, UnauthorizedPage } from './pages/DummyPages';
+import { HomePage, DashboardPage, UnauthorizedPage } from './pages/DummyPages';
+import ProfilePage from './pages/ProfilePage';
+import ProductDetailPage from './pages/ProductDetailPage';
+import CartPage from './pages/CartPage';
+import CheckoutPage from './pages/CheckoutPage';
+import OrderHistoryPage from './pages/OrderHistoryPage';
 import BrandManagement from './pages/admin/BrandManagement';
+import ProductManagement from './pages/admin/ProductManagement';
+import InventoryManagement from './pages/admin/InventoryManagement';
+import UserManagement from './pages/admin/UserManagement';
+import OrderManagement from './pages/admin/OrderManagement';
 import { useAuth } from './context/AuthContext';
 
 function App() {
@@ -23,8 +34,20 @@ function App() {
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
           <Route path="verify-otp" element={<VerifyOTPPage />} />
+          <Route path="forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="reset-password" element={<ResetPasswordPage />} />
           <Route path="auth/google/callback" element={<GoogleCallbackPage />} />
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="products/:id" element={<ProductDetailPage />} />
+          <Route path="cart" element={<CartPage />} />
+          <Route 
+            path="checkout" 
+            element={user ? <CheckoutPage /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="my-orders" 
+            element={user ? <OrderHistoryPage /> : <Navigate to="/login" />} 
+          />
           {/* Các route con của shop sẽ thêm ở đây */}
           <Route path="products" element={<div>Trang danh sách sản phẩm</div>} />
         </Route>
@@ -40,8 +63,10 @@ function App() {
           <Route index element={<DashboardPage />} />
           {/* Các route con của admin sẽ thêm ở đây */}
           <Route path="brands" element={<BrandManagement />} />
-          <Route path="products" element={<div>Quản lý sản phẩm</div>} />
-          <Route path="orders" element={<div>Quản lý đơn hàng</div>} />
+          <Route path="products" element={<ProductManagement />} />
+          <Route path="inventory" element={<InventoryManagement />} />
+          <Route path="users" element={<UserManagement />} />
+          <Route path="orders" element={<OrderManagement />} />
         </Route>
 
         {/* Mặc định nếu gõ sai đường dẫn */}

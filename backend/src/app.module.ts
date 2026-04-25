@@ -21,7 +21,7 @@ import { APP_GUARD } from '@nestjs/core';
     ThrottlerModule.forRoot([{
       name: 'short',
       ttl: 60000,
-      limit: 200, // Tăng lên 200 để tránh bị chặn khi thao tác nhanh
+      limit: 1000, // Tăng mạnh lên 1000 để thoải mái sử dụng
     }, {
       name: 'login',
       ttl: 900000, // 15 phút

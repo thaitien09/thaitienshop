@@ -39,11 +39,38 @@ export class ProductService {
     });
   }
 
-  async findAll(page: number = 1, limit: number = 9) {
+  async findAll(
+    page: number = 1, 
+    limit: number = 9, 
+    search?: string, 
+    brandId?: string,
+    minPrice?: number,
+    maxPrice?: number,
+    stockStatus?: string
+  ) {
     const skip = (Number(page) - 1) * Number(limit);
     
+    const where: any = {};
+    if (search) {
+      where.name = { contains: search };
+    }
+    if (brandId && brandId !== 'all' && brandId !== 'Tất cả') {
+      where.brandId = brandId;
+    }
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      where.price = {};
+      if (minPrice !== undefined) where.price.gte = Number(minPrice);
+      if (maxPrice !== undefined) where.price.lte = Number(maxPrice);
+    }
+    if (stockStatus === 'instock') {
+      where.currentStock = { gt: 0 };
+    } else if (stockStatus === 'outstock') {
+      where.currentStock = { lte: 0 };
+    }
+
     const [data, total] = await Promise.all([
       this.prisma.product.findMany({
+        where,
         skip,
         take: Number(limit),
         include: {
@@ -51,7 +78,7 @@ export class ProductService {
         },
         orderBy: { createdAt: 'desc' }
       }),
-      this.prisma.product.count()
+      this.prisma.product.count({ where })
     ]);
 
     return {

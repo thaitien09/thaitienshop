@@ -84,8 +84,13 @@ export class ProductController {
   async findAll(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 9,
+    @Query('search') search?: string,
+    @Query('brandId') brandId?: string,
+    @Query('minPrice') minPrice?: number,
+    @Query('maxPrice') maxPrice?: number,
+    @Query('stockStatus') stockStatus?: string,
   ) {
-    return this.productService.findAll(page, limit);
+    return this.productService.findAll(page, limit, search, brandId, minPrice, maxPrice, stockStatus);
   }
 
   @Get(':id')

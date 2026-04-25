@@ -70,11 +70,14 @@ const InventoryManagement: React.FC = () => {
     try {
       const [receiptRes, productRes] = await Promise.all([
         api.get('/inventory/receipts'),
-        api.get('/products')
+        api.get('/products?limit=100') // Lấy nhiều sản phẩm để chọn
       ]);
-      const rData = receiptRes.data.data || receiptRes.data;
-      setReceipts(Array.isArray(rData) ? rData : []);
-      const pData = productRes.data.data || productRes.data;
+      
+      const rData = receiptRes.data.data;
+      setReceipts(Array.isArray(rData) ? rData : (rData?.data || []));
+      
+      const pResponse = productRes.data.data;
+      const pData = pResponse?.data || pResponse || [];
       setProducts(Array.isArray(pData) ? pData : []);
     } catch (error) {
       message.error('Không thể tải dữ liệu kho!');

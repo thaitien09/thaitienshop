@@ -25,10 +25,25 @@ export const HomePage: React.FC = () => {
   const fetchProducts = async (page: number) => {
     setLoading(true);
     try {
-      const productRes = await api.get(`/products?page=${page}&limit=${PAGE_SIZE}`);
-      const brandRes = await api.get('/brands');
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: PAGE_SIZE.toString(),
+      });
       
-      // Backend dùng TransformInterceptor nên dữ liệu nằm trong res.data.data
+      if (activeBrand !== 'Tất cả') params.append('brandId', activeBrand);
+      if (stockFilter !== 'all') params.append('stockStatus', stockFilter);
+      
+      if (priceFilter === 'under200') params.append('maxPrice', '200000');
+      else if (priceFilter === '200to400') {
+        params.append('minPrice', '200000');
+        params.append('maxPrice', '400000');
+      } else if (priceFilter === 'over400') params.append('minPrice', '400000');
+
+      const [productRes, brandRes] = await Promise.all([
+        api.get(`/products?${params.toString()}`),
+        api.get('/brands')
+      ]);
+      
       const productResponse = productRes.data.data;
       const brandResponse = brandRes.data.data;
 
@@ -47,22 +62,9 @@ export const HomePage: React.FC = () => {
 
   useEffect(() => {
     fetchProducts(currentPage);
-  }, [currentPage]);
+  }, [currentPage, activeBrand, priceFilter, stockFilter]);
 
-  const filteredProducts = (Array.isArray(products) ? products : []).filter(p => {
-    if (activeBrand !== 'Tất cả' && p.brandId !== activeBrand) return false;
-    if (priceFilter === 'under200' && p.price >= 200000) return false;
-    if (priceFilter === '200to400' && (p.price < 200000 || p.price > 400000)) return false;
-    if (priceFilter === 'over400' && p.price <= 400000) return false;
-    if (stockFilter === 'instock' && p.currentStock <= 0) return false;
-    if (stockFilter === 'outstock' && p.currentStock > 0) return false;
-    return true;
-  });
-
-  const paginatedProducts = filteredProducts.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE
-  );
+  const displayProducts = Array.isArray(products) ? products : [];
 
   const handleFilterChange = (type: string, value: string) => {
     setCurrentPage(1);
@@ -85,7 +87,7 @@ export const HomePage: React.FC = () => {
       {/* Header */}
       <div id="collections" className="mb-8">
         <h1 className="text-[36px] md:text-[56px] font-black tracking-tight leading-none uppercase">Bộ sưu tập</h1>
-        <p className="text-gray-400 text-[12px] uppercase tracking-[0.25em] mt-2">{filteredProducts.length} sản phẩm</p>
+        <p className="text-gray-400 text-[12px] uppercase tracking-[0.25em] mt-2">{totalProducts} sản phẩm</p>
       </div>
 
       <div className="flex gap-10">
@@ -165,18 +167,18 @@ export const HomePage: React.FC = () => {
         {/* ===== PRODUCT GRID ===== */}
         <div className="flex-1 min-w-0">
           <div className="flex justify-between items-center pb-4 mb-6 border-b border-gray-100">
-            <span className="text-[11px] text-gray-400 uppercase tracking-widest">Trang {currentPage} / {Math.ceil(filteredProducts.length / PAGE_SIZE) || 1}</span>
-            <span className="text-[11px] text-gray-400 uppercase tracking-widest">{filteredProducts.length} kết quả</span>
+            <span className="text-[11px] text-gray-400 uppercase tracking-widest">Trang {currentPage} / {Math.ceil(totalProducts / PAGE_SIZE) || 1}</span>
+            <span className="text-[11px] text-gray-400 uppercase tracking-widest">{totalProducts} kết quả</span>
           </div>
 
           {loading ? (
             <div className="py-32 text-center">
               <p className="text-[11px] font-bold text-gray-300 uppercase tracking-[0.3em] animate-pulse">Đang tải sản phẩm...</p>
             </div>
-          ) : filteredProducts.length > 0 ? (
+          ) : displayProducts.length > 0 ? (
             <>
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-10">
-                {paginatedProducts.map((product) => (
+                {displayProducts.map((product) => (
                   <ProductCard
                     key={product.id}
                     id={product.id}
@@ -189,12 +191,12 @@ export const HomePage: React.FC = () => {
                 ))}
               </div>
 
-              {filteredProducts.length > PAGE_SIZE && (
+              {totalProducts > PAGE_SIZE && (
                 <div className="flex justify-center mt-14">
                   <Pagination
                     current={currentPage}
                     pageSize={PAGE_SIZE}
-                    total={filteredProducts.length}
+                    total={totalProducts}
                     onChange={(page) => { setCurrentPage(page); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                     showSizeChanger={false}
                     className="[&_.ant-pagination-item-active]:bg-black [&_.ant-pagination-item-active]:border-black [&_.ant-pagination-item-active_a]:text-white"

@@ -14,9 +14,9 @@ export class MailService {
 
   async sendWelcomeEmail(email: string, name: string, token: string) {
     try {
-      await this.resend.emails.send({
+      const { data, error } = await this.resend.emails.send({
         from: 'Thai Tien Shop <no-reply@thaitienshop.id.vn>',
-        to: email,
+        to: [email],
         subject: 'Xác thực tài khoản Thai Tien Shop của bạn',
         html: `
           <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px; background-color: #ffffff; color: #000000; border: 1px solid #f0f0f0;">

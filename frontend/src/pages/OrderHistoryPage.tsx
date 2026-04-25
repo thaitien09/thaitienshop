@@ -32,14 +32,19 @@ interface Order {
 const OrderHistoryPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const PAGE_SIZE = 5;
+  const PAGE_SIZE = 10;
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (page: number) => {
     setLoading(true);
     try {
-      const res = await api.get('/orders/my-orders');
-      setOrders(res.data.data || res.data);
+      const res = await api.get(`/orders/my-orders?page=${page}&limit=${PAGE_SIZE}`);
+      const data = res.data.data || res.data;
+      const meta = res.data.meta;
+      
+      setOrders(data);
+      setTotal(meta?.total || data.length);
     } catch (error) {
       console.error('Failed to fetch orders', error);
     } finally {
@@ -48,8 +53,8 @@ const OrderHistoryPage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    fetchOrders(currentPage);
+  }, [currentPage]);
 
   const handleCancelOrder = (orderId: string) => {
     Modal.confirm({
@@ -62,7 +67,7 @@ const OrderHistoryPage: React.FC = () => {
         try {
           await api.post(`/orders/${orderId}/cancel`);
           message.success('Đã hủy đơn hàng thành công');
-          fetchOrders();
+          fetchOrders(currentPage);
         } catch (error: any) {
           message.error(error.response?.data?.message || 'Không thể hủy đơn hàng');
         }
@@ -116,9 +121,7 @@ const OrderHistoryPage: React.FC = () => {
       </div>
 
       <div className="space-y-12">
-        {orders
-          .slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
-          .map((order) => (
+        {orders.map((order) => (
           <Card 
             key={order.id} 
             className="hover:border-black transition-all rounded-sm shadow-sm overflow-hidden"
@@ -211,15 +214,15 @@ const OrderHistoryPage: React.FC = () => {
       </div>
 
       {/* Phân trang */}
-      {orders.length > PAGE_SIZE && (
+      {total > PAGE_SIZE && (
         <div className="flex justify-between items-center mt-12 pt-8 border-t border-gray-100">
           <Text className="text-[12px] text-gray-400 uppercase tracking-widest">
-            Trang {currentPage} / {Math.ceil(orders.length / PAGE_SIZE)}
+            Trang {currentPage} / {Math.ceil(total / PAGE_SIZE)}
           </Text>
           <Pagination
             current={currentPage}
             pageSize={PAGE_SIZE}
-            total={orders.length}
+            total={total}
             onChange={(page) => {
               setCurrentPage(page);
               window.scrollTo({ top: 0, behavior: 'smooth' });

@@ -19,26 +19,34 @@ export const HomePage: React.FC = () => {
   const [stockFilter, setStockFilter] = useState('all');
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const PAGE_SIZE = 12;
+  const [totalProducts, setTotalProducts] = useState(0);
+  const PAGE_SIZE = 9;
+
+  const fetchProducts = async (page: number) => {
+    setLoading(true);
+    try {
+      const [brandRes, productRes] = await Promise.all([
+        api.get('/brands'),
+        api.get(`/products?page=${page}&limit=${PAGE_SIZE}`)
+      ]);
+      setBrands(brandRes.data.data || brandRes.data);
+      
+      // Backend trả về { data: [...], meta: { total: ... } }
+      const productData = productRes.data.data || productRes.data;
+      const productMeta = productRes.data.meta;
+      
+      setProducts(productData);
+      setTotalProducts(productMeta?.total || productData.length);
+    } catch (error) {
+      message.error('Không thể tải dữ liệu sản phẩm!');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [brandRes, productRes] = await Promise.all([
-          api.get('/brands'),
-          api.get('/products')
-        ]);
-        setBrands(brandRes.data.data || brandRes.data);
-        setProducts(productRes.data.data || productRes.data);
-      } catch (error) {
-        message.error('Không thể tải dữ liệu sản phẩm!');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+    fetchProducts(currentPage);
+  }, [currentPage]);
 
   const filteredProducts = products.filter(p => {
     if (activeBrand !== 'Tất cả' && p.brandId !== activeBrand) return false;

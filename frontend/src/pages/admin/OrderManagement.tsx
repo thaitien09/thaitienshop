@@ -9,16 +9,23 @@ const { Option } = Select;
 const OrderManagement: React.FC = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [total, setTotal] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
   const [searchText, setSearchText] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (page: number) => {
     setLoading(true);
     try {
-      const res = await api.get('/orders');
-      setOrders(res.data.data || res.data);
+      const res = await api.get(`/orders?page=${page}&limit=${PAGE_SIZE}`);
+      const data = res.data.data || res.data;
+      const meta = res.data.meta;
+      
+      setOrders(data);
+      setTotal(meta?.total || data.length);
     } catch (error) {
       message.error('Không thể tải danh sách đơn hàng');
     } finally {
@@ -27,14 +34,14 @@ const OrderManagement: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    fetchOrders(currentPage);
+  }, [currentPage]);
 
   const handleUpdateStatus = async (orderId: string, newStatus: string) => {
     try {
       await api.patch(`/orders/${orderId}/status`, { status: newStatus });
       message.success('Cập nhật trạng thái thành công');
-      fetchOrders();
+      fetchOrders(currentPage);
       if (selectedOrder && selectedOrder.id === orderId) {
         setSelectedOrder({ ...selectedOrder, status: newStatus });
       }
@@ -110,15 +117,15 @@ const OrderManagement: React.FC = () => {
       key: 'action',
       render: (_: any, record: any) => (
         <Space size="middle">
-          <Button 
-            icon={<Eye size={16} />} 
+          <Button
+            icon={<Eye size={16} />}
             onClick={() => showDetail(record)}
             className="flex items-center gap-1"
           >
             Chi tiết
           </Button>
-          <Select 
-            value={record.status} 
+          <Select
+            value={record.status}
             style={{ width: 150 }}
             onChange={(val) => handleUpdateStatus(record.id, val)}
             className="status-select"
@@ -141,9 +148,9 @@ const OrderManagement: React.FC = () => {
           <Text className="text-gray-400 text-[13px] uppercase tracking-[0.2em]">Quản lý và xử lý đơn hàng từ khách hàng</Text>
         </div>
         <Badge count={orders.filter(o => o.status === 'PENDING').length} offset={[10, 0]}>
-          <Button 
-            icon={<ShoppingBag size={18} />} 
-            onClick={fetchOrders}
+          <Button
+            icon={<ShoppingBag size={18} />}
+            onClick={() => fetchOrders(currentPage)}
             className="h-12 px-6 rounded-sm font-bold uppercase text-[11px] tracking-widest flex items-center gap-2"
           >
             Làm mới danh sách
@@ -167,9 +174,9 @@ const OrderManagement: React.FC = () => {
             onChange={e => setSearchText(e.target.value)}
             style={{ maxWidth: 350 }}
           />
-          <Select 
-            value={filterStatus} 
-            onChange={setFilterStatus} 
+          <Select
+            value={filterStatus}
+            onChange={setFilterStatus}
             style={{ width: 180 }}
           >
             <Option value="all">Tất cả trạng thái</Option>
@@ -180,8 +187,8 @@ const OrderManagement: React.FC = () => {
           </Select>
           <span style={{ lineHeight: '32px', color: '#888', fontSize: 12 }}>
             {orders.filter(o => {
-              const matchSearch = 
-                (o.orderCode?.toLowerCase().includes(searchText.toLowerCase())) || 
+              const matchSearch =
+                (o.orderCode?.toLowerCase().includes(searchText.toLowerCase())) ||
                 (o.customerName && o.customerName.toLowerCase().includes(searchText.toLowerCase())) ||
                 (o.customerPhone && o.customerPhone.includes(searchText));
               const matchStatus = filterStatus === 'all' || o.status === filterStatus;
@@ -190,19 +197,24 @@ const OrderManagement: React.FC = () => {
           </span>
         </div>
 
-        <Table 
-          columns={columns} 
+        <Table
+          columns={columns}
           dataSource={orders.filter(o => {
-            const matchSearch = 
-              (o.orderCode?.toLowerCase().includes(searchText.toLowerCase())) || 
+            const matchSearch =
+              (o.orderCode?.toLowerCase().includes(searchText.toLowerCase())) ||
               (o.customerName && o.customerName.toLowerCase().includes(searchText.toLowerCase())) ||
               (o.customerPhone && o.customerPhone.includes(searchText));
             const matchStatus = filterStatus === 'all' || o.status === filterStatus;
             return matchSearch && matchStatus;
-          })} 
-          rowKey="id" 
+          })}
+          rowKey="id"
           loading={loading}
-          pagination={{ pageSize: 10 }}
+          pagination={{ 
+            current: currentPage, 
+            pageSize: PAGE_SIZE, 
+            total: total,
+            onChange: (page) => setCurrentPage(page)
+          }}
           className="admin-table"
         />
       </Card>
@@ -214,9 +226,9 @@ const OrderManagement: React.FC = () => {
         onCancel={() => setIsModalOpen(false)}
         footer={[
           <Button key="close" onClick={() => setIsModalOpen(false)}>Đóng</Button>,
-          <Button 
-            key="print" 
-            type="primary" 
+          <Button
+            key="print"
+            type="primary"
             className="bg-black"
             onClick={() => window.print()}
           >
@@ -283,8 +295,8 @@ const OrderManagement: React.FC = () => {
                       <tr key={item.id}>
                         <td className="px-4 py-4">
                           <Space>
-                            <img 
-                              src={item.product.image ? (item.product.image.startsWith('http') ? item.product.image : `${BASE_URL}${item.product.image}`) : 'https://placehold.co/50x50'} 
+                            <img
+                              src={item.product.image ? (item.product.image.startsWith('http') ? item.product.image : `${BASE_URL}${item.product.image}`) : 'https://placehold.co/50x50'}
                               className="w-10 h-10 object-contain rounded-sm"
                               alt=""
                             />
@@ -309,8 +321,8 @@ const OrderManagement: React.FC = () => {
 
             {/* Quick Status Update in Modal */}
             <div className="mt-8 flex justify-end gap-4">
-              <Select 
-                value={selectedOrder.status} 
+              <Select
+                value={selectedOrder.status}
                 style={{ width: 200 }}
                 onChange={(val) => handleUpdateStatus(selectedOrder.id, val)}
               >

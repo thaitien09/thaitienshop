@@ -51,6 +51,9 @@ const ProductManagement: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(false);
+  const [total, setTotal] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
   const [searchText, setSearchText] = useState('');
   const [filterBrand, setFilterBrand] = useState<string>('all');
   const [filterStock, setFilterStock] = useState<string>('all');
@@ -79,14 +82,18 @@ const ProductManagement: React.FC = () => {
     }
   };
 
-  const fetchData = async () => {
+  const fetchData = async (page: number) => {
     setLoading(true);
     try {
       const [prodRes, brandRes] = await Promise.all([
-        api.get('/products'),
+        api.get(`/products?page=${page}&limit=${PAGE_SIZE}`),
         api.get('/brands')
       ]);
-      setProducts(prodRes.data.data || prodRes.data);
+      const data = prodRes.data.data || prodRes.data;
+      const meta = prodRes.data.meta;
+      
+      setProducts(data);
+      setTotal(meta?.total || data.length);
       setBrands(brandRes.data.data || brandRes.data);
     } catch (error) {
       message.error('Không thể tải dữ liệu!');
@@ -96,8 +103,8 @@ const ProductManagement: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData(currentPage);
+  }, [currentPage]);
 
   // Mở Modal Thêm mới
   const showAddModal = () => {
@@ -168,7 +175,7 @@ const ProductManagement: React.FC = () => {
         });
         message.success('Thêm sản phẩm thành công!');
       }
-      fetchData();
+      fetchData(currentPage);
       handleCancel();
     } catch (error: any) {
       message.error(error.response?.data?.message || 'Lỗi khi lưu sản phẩm!');
@@ -181,7 +188,7 @@ const ProductManagement: React.FC = () => {
     try {
       await api.delete(`/products/${id}`);
       message.success('Đã xóa sản phẩm!');
-      fetchData();
+      fetchData(currentPage);
     } catch (error) {
       message.error('Không thể xóa sản phẩm!');
     }
@@ -327,7 +334,12 @@ const ProductManagement: React.FC = () => {
           })}
           rowKey="id"
           loading={loading}
-          pagination={{ pageSize: 8 }}
+          pagination={{ 
+            current: currentPage, 
+            pageSize: PAGE_SIZE, 
+            total: total,
+            onChange: (page) => setCurrentPage(page)
+          }}
         />
       </Card>
 

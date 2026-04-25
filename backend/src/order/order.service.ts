@@ -92,20 +92,38 @@ export class OrderService {
     });
   }
 
-  async findAll(userId?: string) {
-    return this.prisma.order.findMany({
-      where: userId ? { userId } : {},
-      include: {
-        items: {
-          include: {
-            product: true,
+  async findAll(page: number = 1, limit: number = 9, userId?: string) {
+    const skip = (page - 1) * limit;
+    const where = userId ? { userId } : {};
+
+    const [data, total] = await Promise.all([
+      this.prisma.order.findMany({
+        where,
+        skip,
+        take: Number(limit),
+        include: {
+          items: {
+            include: {
+              product: true,
+            },
           },
         },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      this.prisma.order.count({ where })
+    ]);
+
+    return {
+      data,
+      meta: {
+        total,
+        page: Number(page),
+        lastPage: Math.ceil(total / limit),
+        limit: Number(limit)
+      }
+    };
   }
 
   async findOne(id: string) {

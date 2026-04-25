@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, UseGuards, Req, Patch } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, UseGuards, Req, Patch, Query } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { AuthGuard } from '../auth/guards/auth.guard';
@@ -19,14 +19,21 @@ export class OrderController {
   @Get()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
-  findAll() {
-    return this.orderService.findAll();
+  findAll(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 9,
+  ) {
+    return this.orderService.findAll(page, limit);
   }
 
   @Get('my-orders')
   @UseGuards(AuthGuard)
-  findMyOrders(@Req() req: any) {
-    return this.orderService.findAll(req.user.id);
+  findMyOrders(
+    @Req() req: any,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 9,
+  ) {
+    return this.orderService.findAll(page, limit, req.user.id);
   }
 
   @Get(':id')

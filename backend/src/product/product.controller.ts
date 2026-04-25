@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, UploadedFile, BadRequestException, Inject } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, UploadedFile, BadRequestException, Inject, Query } from '@nestjs/common';
 import { CACHE_MANAGER, CacheInterceptor } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { ProductService } from './product.service';
@@ -80,9 +80,12 @@ export class ProductController {
 
   @Get()
   @UseInterceptors(CacheInterceptor)
-  @ApiOperation({ summary: 'Lấy danh sách tất cả sản phẩm' })
-  async findAll() {
-    return this.productService.findAll();
+  @ApiOperation({ summary: 'Lấy danh sách sản phẩm có phân trang' })
+  async findAll(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 9,
+  ) {
+    return this.productService.findAll(page, limit);
   }
 
   @Get(':id')

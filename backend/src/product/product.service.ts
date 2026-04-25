@@ -39,13 +39,30 @@ export class ProductService {
     });
   }
 
-  async findAll() {
-    return await this.prisma.product.findMany({
-      include: {
-        brand: true
-      },
-      orderBy: { createdAt: 'desc' }
-    });
+  async findAll(page: number = 1, limit: number = 9) {
+    const skip = (page - 1) * limit;
+    
+    const [data, total] = await Promise.all([
+      this.prisma.product.findMany({
+        skip,
+        take: Number(limit),
+        include: {
+          brand: true
+        },
+        orderBy: { createdAt: 'desc' }
+      }),
+      this.prisma.product.count()
+    ]);
+
+    return {
+      data,
+      meta: {
+        total,
+        page: Number(page),
+        lastPage: Math.ceil(total / limit),
+        limit: Number(limit)
+      }
+    };
   }
 
   async findOne(id: string) {

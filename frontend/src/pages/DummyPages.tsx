@@ -25,18 +25,19 @@ export const HomePage: React.FC = () => {
   const fetchProducts = async (page: number) => {
     setLoading(true);
     try {
-      const [brandRes, productRes] = await Promise.all([
-        api.get('/brands'),
-        api.get(`/products?page=${page}&limit=${PAGE_SIZE}`)
-      ]);
-      setBrands(brandRes.data.data || brandRes.data);
+      const productRes = await api.get(`/products?page=${page}&limit=${PAGE_SIZE}`);
+      const brandRes = await api.get('/brands');
       
-      // Backend trả về { data: [...], meta: { total: ... } }
-      const productData = productRes.data.data || productRes.data;
-      const productMeta = productRes.data.meta;
+      // Backend dùng TransformInterceptor nên dữ liệu nằm trong res.data.data
+      const productResponse = productRes.data.data;
+      const brandResponse = brandRes.data.data;
+
+      const productData = productResponse?.data || productResponse || [];
+      const productMeta = productResponse?.meta;
       
       setProducts(productData);
       setTotalProducts(productMeta?.total || productData.length);
+      setBrands(brandResponse || []);
     } catch (error) {
       message.error('Không thể tải dữ liệu sản phẩm!');
     } finally {

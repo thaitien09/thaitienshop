@@ -89,12 +89,16 @@ const ProductManagement: React.FC = () => {
         api.get(`/products?page=${page}&limit=${PAGE_SIZE}`),
         api.get('/brands')
       ]);
-      const data = prodRes.data.data || prodRes.data;
-      const meta = prodRes.data.meta;
       
-      setProducts(data);
-      setTotal(meta?.total || data.length);
-      setBrands(brandRes.data.data || brandRes.data);
+      const productResponse = prodRes.data.data;
+      const brandResponse = brandRes.data.data;
+
+      const productData = productResponse?.data || productResponse || [];
+      const productMeta = productResponse?.meta;
+      
+      setProducts(productData);
+      setTotal(productMeta?.total || productData.length);
+      setBrands(brandResponse || []);
     } catch (error) {
       message.error('Không thể tải dữ liệu!');
     } finally {

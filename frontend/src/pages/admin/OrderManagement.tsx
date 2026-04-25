@@ -21,11 +21,13 @@ const OrderManagement: React.FC = () => {
     setLoading(true);
     try {
       const res = await api.get(`/orders?page=${page}&limit=${PAGE_SIZE}`);
-      const data = res.data.data || res.data;
-      const meta = res.data.meta;
+      const responseData = res.data.data;
       
-      setOrders(data);
-      setTotal(meta?.total || data.length);
+      const ordersData = responseData?.data || responseData || [];
+      const meta = responseData?.meta;
+
+      setOrders(ordersData);
+      setTotal(meta?.total || ordersData.length);
     } catch (error) {
       message.error('Không thể tải danh sách đơn hàng');
     } finally {

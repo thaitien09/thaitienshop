@@ -47,6 +47,7 @@ export class MailService {
       });
     } catch (err) {
       this.logger.error('Lỗi chi tiết từ Resend:', JSON.stringify(err, null, 2));
+      throw err; // Ném lỗi để AuthService xử lý Rollback
     }
   }
 
@@ -84,7 +85,8 @@ export class MailService {
         `,
       });
     } catch (err) {
-      this.logger.error('Lỗi khi gửi email khôi phục:', err);
+      this.logger.error('Lỗi khi gửi email khôi phục:', JSON.stringify(err, null, 2));
+      throw err;
     }
   }
 }

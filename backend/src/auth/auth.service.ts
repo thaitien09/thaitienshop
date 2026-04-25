@@ -31,18 +31,25 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
 
-    const user = await this.usersService.create({
-      email,
-      password: hashedPassword,
-      name,
-      isEmailVerified: true, // Mặc định đã xác thực để Demo mượt mà
-      emailVerificationToken: null,
+    const user = await this.prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        name,
+        isEmailVerified: false,
+        emailVerificationToken: verificationToken,
+      }
     });
 
-    this.mailService.sendWelcomeEmail(user.email, user.name || 'Thành viên mới', verificationToken);
+    try {
+      await this.mailService.sendWelcomeEmail(user.email, user.name || 'Thành viên mới', verificationToken);
+    } catch (error) {
+      // Rollback nếu gửi mail lỗi
+      await this.prisma.user.delete({ where: { id: user.id } });
+      throw new BadRequestException('Gửi email xác thực thất bại. Vui lòng thử lại!');
+    }
 
     const { password: _, emailVerificationToken: __, ...result } = user;
     return result;

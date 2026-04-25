@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, UploadedFile, BadRequestException, Inject } from '@nestjs/common';
 import { CACHE_MANAGER, CacheInterceptor } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+import type { Cache } from 'cache-manager';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -37,13 +37,8 @@ export class ProductController {
   ) { }
 
   private async clearCache() {
-    // Xóa cache danh sách sản phẩm khi có thay đổi
-    // NestJS CacheInterceptor dùng URL làm key, nên chúng ta xóa các key bắt đầu bằng /api/products
-    const keys: string[] = await this.cacheManager.store.keys() as any;
-    const productsKeys = keys.filter(key => key.includes('/api/products'));
-    for (const key of productsKeys) {
-      await this.cacheManager.del(key);
-    }
+    // Xóa toàn bộ cache khi có thay đổi thương hiệu
+    await this.cacheManager.reset();
   }
 
   @Post()

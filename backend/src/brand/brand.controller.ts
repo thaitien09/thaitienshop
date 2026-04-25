@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, Inject } from '@nestjs/common';
 import { CACHE_MANAGER, CacheInterceptor } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+import type { Cache } from 'cache-manager';
 import { BrandService } from './brand.service';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
@@ -20,12 +20,8 @@ export class BrandController {
   ) { }
 
   private async clearCache() {
-    // NestJS CacheInterceptor dùng URL làm key, nên chúng ta xóa các key bắt đầu bằng /api/brands
-    const keys: string[] = await this.cacheManager.store.keys() as any;
-    const brandsKeys = keys.filter(key => key.includes('/api/brands'));
-    for (const key of brandsKeys) {
-      await this.cacheManager.del(key);
-    }
+    // Xóa toàn bộ cache khi có thay đổi thương hiệu
+    await this.cacheManager.reset();
   }
 
   @Post()

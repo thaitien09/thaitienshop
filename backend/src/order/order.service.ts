@@ -19,49 +19,40 @@ export class OrderService {
   async create(createOrderDto: CreateOrderDto, userId?: string) {
     const { items, ...orderData } = createOrderDto;
 
+    // 1. Kiểm tra tồn kho trước khi tạo đơn
+    for (const item of items) {
+      const product = await this.prisma.product.findUnique({
+        where: { id: item.productId },
+      });
+
+      if (!product) {
+        throw new BadRequestException(`Sản phẩm với ID ${item.productId} không tồn tại`);
+      }
+
+      if (product.currentStock < item.quantity) {
+        throw new BadRequestException(`Sản phẩm ${product.name} không đủ hàng trong kho (Còn: ${product.currentStock})`);
+      }
+    }
+
+    // 2. Tính tổng tiền
+    const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const orderCode = this.generateOrderCode();
+
+    // 3. Sử dụng Transaction để đảm bảo tính toàn vẹn dữ liệu
     return this.prisma.$transaction(async (tx) => {
-      const orderCode = this.generateOrderCode();
-      let totalAmount = 0;
-      const orderItemsData = [];
-
-      // Xử lý từng item trong một vòng lặp duy nhất
+      // Tạo danh sách items kèm giá vốn hiện tại
+      const orderItems: any[] = [];
       for (const item of items) {
-        // 1. Lấy thông tin sản phẩm và KHÓA dòng này để tránh tranh chấp (Lock)
-        const product = await tx.product.findUnique({
-          where: { id: item.productId },
-          select: { id: true, name: true, price: true, currentStock: true, costPrice: true }
-        });
-
-        if (!product) {
-          throw new BadRequestException(`Sản phẩm ID ${item.productId} không tồn tại`);
-        }
-
-        // 2. Kiểm tra tồn kho ngay lập tức
-        if (product.currentStock < item.quantity) {
-          throw new BadRequestException(`Sản phẩm ${product.name} không đủ hàng (Còn: ${product.currentStock})`);
-        }
-
-        // 3. Trừ tồn kho luôn
-        await tx.product.update({
-          where: { id: item.productId },
-          data: {
-            currentStock: {
-              decrement: item.quantity,
-            },
-          },
-        });
-
-        // 4. Chuẩn bị dữ liệu item đơn hàng
-        totalAmount += item.price * item.quantity;
-        orderItemsData.push({
+        const product = await tx.product.findUnique({ where: { id: item.productId } });
+        orderItems.push({
           productId: item.productId,
           quantity: item.quantity,
           price: item.price,
-          costPrice: product.costPrice || 0,
+          costPrice: product?.costPrice || 0, // Lưu giá vốn tại thời điểm mua
         });
       }
 
-      // 5. Tạo đơn hàng và chi tiết đơn hàng
+      // Tạo đơn hàng
       const order = await tx.order.create({
         data: {
           orderCode,
@@ -77,13 +68,25 @@ export class OrderService {
           totalAmount,
           ...(userId ? { user: { connect: { id: userId } } } : {}),
           items: {
-            create: orderItemsData,
+            create: orderItems,
           },
         },
         include: {
           items: true,
         },
       });
+
+      // Trừ tồn kho
+      for (const item of items) {
+        await tx.product.update({
+          where: { id: item.productId },
+          data: {
+            currentStock: {
+              decrement: item.quantity,
+            },
+          },
+        });
+      }
 
       return order;
     });

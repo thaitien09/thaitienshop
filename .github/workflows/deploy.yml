@@ -1,44 +1,24 @@
-name: Deploy Thai Tien Shop to AWS
-
-on:
-  push:
-    branches: [ master ]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup SSH Key
-        run: |
-          mkdir -p ~/.ssh
-          cat << 'EOF' > ~/.ssh/id_rsa
-${{ secrets.SSH_PRIVATE_KEY }}
-EOF
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
-
-      - name: Deploy to Server
-        run: |
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
-            if [ ! -d "thaitienshop" ]; then
-              git clone https://github.com/${{ github.repository }}.git thaitienshop
-            fi
-            cd thaitienshop
-            git pull origin master
-            
-            # Tạo file .env từ GitHub Secrets
-            echo "DATABASE_URL=mysql://root:${{ secrets.MYSQL_ROOT_PASSWORD }}@db:3306/thaitienshop" > .env
-            echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
-            echo "JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}" >> .env
-            echo "JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}" >> .env
-            echo "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}" >> .env
-            echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
-            echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
-            echo "GOOGLE_CALLBACK_URL=http://${{ secrets.HOST }}:3000/auth/google/callback" >> .env
-            
-            docker compose up -d --build
-            docker image prune -f
-          EOF
+- name: Deploy to Server
+  uses: appleboy/ssh-action@master
+  with:
+    host: ${{ secrets.HOST }}
+    username: ${{ secrets.USERNAME }}
+    key: ${{ secrets.SSH_PRIVATE_KEY }}
+    script: |
+      if [ ! -d "thaitienshop" ]; then
+        git clone https://github.com/${{ github.repository }}.git thaitienshop
+      fi
+      cd thaitienshop
+      git pull origin master
+      
+      echo "DATABASE_URL=mysql://root:${{ secrets.MYSQL_ROOT_PASSWORD }}@db:3306/thaitienshop" > .env
+      echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
+      echo "JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}" >> .env
+      echo "JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}" >> .env
+      echo "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}" >> .env
+      echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
+      echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
+      echo "GOOGLE_CALLBACK_URL=http://${{ secrets.HOST }}:3000/auth/google/callback" >> .env
+      
+      docker compose up -d --build
+      docker image prune -f

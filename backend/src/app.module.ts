@@ -21,7 +21,7 @@ import { APP_GUARD } from '@nestjs/core';
     ThrottlerModule.forRoot([{
       name: 'short',
       ttl: 60000,
-      limit: 1000, // Tăng mạnh lên 1000 để thoải mái sử dụng
+      limit: 10000, // Tăng mạnh lên 10.000 để test thoải mái
     }]),
     PrismaModule,
     AuthModule,

@@ -147,7 +147,7 @@ const OrderManagement: React.FC = () => {
           <Title level={2} className="!text-[32px] font-black tracking-tighter uppercase mb-2">Quản lý đơn hàng</Title>
           <Text className="text-gray-400 text-[13px] uppercase tracking-[0.2em]">Quản lý và xử lý đơn hàng từ khách hàng</Text>
         </div>
-        <Badge count={orders.filter(o => o.status === 'PENDING').length} offset={[10, 0]}>
+        <Badge count={(Array.isArray(orders) ? orders : []).filter(o => o.status === 'PENDING').length} offset={[10, 0]}>
           <Button
             icon={<ShoppingBag size={18} />}
             onClick={() => fetchOrders(currentPage)}
@@ -186,9 +186,9 @@ const OrderManagement: React.FC = () => {
             <Option value="CANCELLED">Đã hủy</Option>
           </Select>
           <span style={{ lineHeight: '32px', color: '#888', fontSize: 12 }}>
-            {orders.filter(o => {
-              const matchSearch =
-                (o.orderCode?.toLowerCase().includes(searchText.toLowerCase())) ||
+            {(Array.isArray(orders) ? orders : []).filter(o => {
+              const matchSearch = 
+                (o.orderCode?.toLowerCase().includes(searchText.toLowerCase())) || 
                 (o.customerName && o.customerName.toLowerCase().includes(searchText.toLowerCase())) ||
                 (o.customerPhone && o.customerPhone.includes(searchText));
               const matchStatus = filterStatus === 'all' || o.status === filterStatus;
@@ -199,14 +199,14 @@ const OrderManagement: React.FC = () => {
 
         <Table
           columns={columns}
-          dataSource={orders.filter(o => {
-            const matchSearch =
-              (o.orderCode?.toLowerCase().includes(searchText.toLowerCase())) ||
+          dataSource={(Array.isArray(orders) ? orders : []).filter(o => {
+            const matchSearch = 
+              (o.orderCode?.toLowerCase().includes(searchText.toLowerCase())) || 
               (o.customerName && o.customerName.toLowerCase().includes(searchText.toLowerCase())) ||
               (o.customerPhone && o.customerPhone.includes(searchText));
             const matchStatus = filterStatus === 'all' || o.status === filterStatus;
             return matchSearch && matchStatus;
-          })}
+          })} 
           rowKey="id"
           loading={loading}
           pagination={{ 

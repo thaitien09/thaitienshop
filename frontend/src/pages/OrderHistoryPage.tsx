@@ -121,7 +121,7 @@ const OrderHistoryPage: React.FC = () => {
       </div>
 
       <div className="space-y-12">
-        {orders.map((order) => (
+        {(Array.isArray(orders) ? orders : []).map((order) => (
           <Card 
             key={order.id} 
             className="hover:border-black transition-all rounded-sm shadow-sm overflow-hidden"

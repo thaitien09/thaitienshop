@@ -48,7 +48,7 @@ export const HomePage: React.FC = () => {
     fetchProducts(currentPage);
   }, [currentPage]);
 
-  const filteredProducts = products.filter(p => {
+  const filteredProducts = (Array.isArray(products) ? products : []).filter(p => {
     if (activeBrand !== 'Tất cả' && p.brandId !== activeBrand) return false;
     if (priceFilter === 'under200' && p.price >= 200000) return false;
     if (priceFilter === '200to400' && (p.price < 200000 || p.price > 400000)) return false;
@@ -109,7 +109,7 @@ export const HomePage: React.FC = () => {
                 >
                   Tất cả
                 </button>
-                {brands.map(b => (
+                {(Array.isArray(brands) ? brands : []).map(b => (
                   <button
                     key={b.id}
                     onClick={() => handleFilterChange('brand', b.id)}

@@ -294,7 +294,7 @@ const ProductManagement: React.FC = () => {
             style={{ width: 160 }}
           >
             <Option value="all">Tất cả thương hiệu</Option>
-            {brands.map(b => <Option key={b.id} value={b.id}>{b.name}</Option>)}
+            {(Array.isArray(brands) ? brands : []).map(b => <Option key={b.id} value={b.id}>{b.name}</Option>)}
           </Select>
           <Select 
             value={filterStock} 
@@ -307,7 +307,7 @@ const ProductManagement: React.FC = () => {
             <Option value="lowstock">Sắp hết (&lt; 5)</Option>
           </Select>
           <span style={{ lineHeight: '32px', color: '#888', fontSize: 12 }}>
-            {products.filter(p => {
+            {(Array.isArray(products) ? products : []).filter(p => {
               const matchSearch = p.name.toLowerCase().includes(searchText.toLowerCase()) || (p.sku && p.sku.toLowerCase().includes(searchText.toLowerCase()));
               const matchBrand = filterBrand === 'all' || p.brandId === filterBrand;
               const matchStock = filterStock === 'all' 
@@ -322,7 +322,7 @@ const ProductManagement: React.FC = () => {
 
         <Table
           columns={columns}
-          dataSource={products.filter(p => {
+          dataSource={(Array.isArray(products) ? products : []).filter(p => {
             const matchSearch = p.name.toLowerCase().includes(searchText.toLowerCase()) || (p.sku && p.sku.toLowerCase().includes(searchText.toLowerCase()));
             const matchBrand = filterBrand === 'all' || p.brandId === filterBrand;
             const matchStock = filterStock === 'all' 
@@ -373,7 +373,7 @@ const ProductManagement: React.FC = () => {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             <Form.Item name="brandId" label="Thương hiệu" rules={[{ required: true, message: 'Vui lòng chọn thương hiệu' }]}>
               <Select placeholder="Chọn thương hiệu">
-                {brands.map(b => <Option key={b.id} value={b.id}>{b.name}</Option>)}
+                {(Array.isArray(brands) ? brands : []).map(b => <Option key={b.id} value={b.id}>{b.name}</Option>)}
               </Select>
             </Form.Item>
             <Form.Item name="price" label="Giá bán (VND)" rules={[{ required: true, message: 'Vui lòng nhập giá bán' }]}>

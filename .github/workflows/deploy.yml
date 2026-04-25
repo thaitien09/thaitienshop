@@ -1,45 +1,26 @@
-name: Deploy Thai Tien Shop to AWS
+- name: Deploy to Server
+  run: |
+    ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} << EOF
+      set -e
 
-on:
-  push:
-    branches: [ master ]
+      if [ ! -d "thaitienshop" ]; then
+        git clone https://github.com/${{ github.repository }}.git thaitienshop
+      fi
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      cd thaitienshop
+      git pull origin master
 
-      - name: Setup SSH Key
-        run: |
-          mkdir -p ~/.ssh
-          cat << 'EOF' > ~/.ssh/id_rsa
-${{ secrets.SSH_PRIVATE_KEY }}
-EOF
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+      cat > .env <<EOL
+DATABASE_URL=mysql://root:${{ secrets.MYSQL_ROOT_PASSWORD }}@db:3306/thaitienshop
+MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
+JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
+JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
+RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
+GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+GOOGLE_CALLBACK_URL=http://${{ secrets.HOST }}:3000/auth/google/callback
+EOL
 
-      - name: Deploy to Server
-        run: |
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
-            if [ ! -d "thaitienshop" ]; then
-              git clone https://github.com/${{ github.repository }}.git thaitienshop
-            fi
-            cd thaitienshop
-            git pull origin master
-            
-            # Tạo file .env bí mật ngay trên server
-            echo "DATABASE_URL=mysql://root:${{ secrets.MYSQL_ROOT_PASSWORD }}@db:3306/thaitienshop" > .env
-            echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
-            echo "JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}" >> .env
-            echo "JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}" >> .env
-            echo "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}" >> .env
-            echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
-            echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
-            echo "GOOGLE_CALLBACK_URL=http://${{ secrets.HOST }}:3000/auth/google/callback" >> .env
-            
-            # Khởi động hệ thống
-            docker compose up -d --build
-            docker image prune -f
-          EOF
+      docker compose up -d --build || docker-compose up -d --build
+      docker image prune -f
+    EOF

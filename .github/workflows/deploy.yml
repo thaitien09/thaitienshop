@@ -11,25 +11,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Deploy to Server via SSH
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            # 1. Di chuyển vào thư mục dự án (nếu chưa có thì clone về)
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to Server
+        run: |
+          ssh ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
             if [ ! -d "thaitienshop" ]; then
               git clone https://github.com/${{ github.repository }}.git thaitienshop
             fi
-            
             cd thaitienshop
-            
-            # 2. Cập nhật code mới nhất
-            git pull origin main
-            
-            # 3. Kích nổ Docker Compose V2
+            git pull origin master
             docker compose up -d --build
-            
-            # 4. Dọn dẹp các Image thừa để tiết kiệm dung lượng (rất quan trọng cho VPS 2GB)
             docker image prune -f
+          EOF

@@ -37,8 +37,8 @@ export class ProductController {
   ) { }
 
   private async clearCache() {
-    // Xóa toàn bộ cache khi có thay đổi thương hiệu
-    await this.cacheManager.reset();
+    // Xóa toàn bộ cache để đảm bảo dữ liệu mới nhất được cập nhật
+    await this.cacheManager.clear();
   }
 
   @Post()

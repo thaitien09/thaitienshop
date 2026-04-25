@@ -21,7 +21,7 @@ export class BrandController {
 
   private async clearCache() {
     // Xóa toàn bộ cache khi có thay đổi thương hiệu
-    await this.cacheManager.reset();
+    await this.cacheManager.clear();
   }
 
   @Post()

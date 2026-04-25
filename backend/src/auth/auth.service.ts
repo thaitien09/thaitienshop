@@ -46,7 +46,6 @@ export class AuthService {
     });
 
     try {
-      this.logger.log(`MÃ XÁC THỰC CHO ${user.email} LÀ: ${verificationToken}`);
       await this.mailService.sendWelcomeEmail(user.email, user.name || 'Thành viên mới', verificationToken);
     } catch (error) {
       // Rollback nếu gửi mail lỗi
@@ -109,7 +108,6 @@ export class AuthService {
       data: { emailVerificationToken: newToken },
     });
 
-    this.logger.log(`MÃ XÁC THỰC MỚI CHO ${user.email} LÀ: ${newToken}`);
     await this.mailService.sendWelcomeEmail(user.email, user.name || 'Thành viên mới', newToken);
 
     return { message: 'Mã xác thực mới đã được gửi thành công!' };
@@ -306,8 +304,7 @@ export class AuthService {
     });
 
     try {
-      this.logger.log(`MÃ KHÔI PHỤC MẬT KHẨU CHO ${user.email} LÀ: ${resetToken}`);
-      await this.mailService.sendResetPasswordEmail(user.email, user.name || 'Thành viên', resetToken);
+      await this.mailService.sendResetPasswordEmail(user.email, user.name || 'Thành viên mới', resetToken);
       return { message: 'Mã khôi phục đã được gửi đến email của bạn.' };
     } catch (error) {
       // Rollback token nếu gửi mail lỗi

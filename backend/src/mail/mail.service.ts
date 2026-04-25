@@ -11,8 +11,6 @@ export class MailService {
     const apiKey = this.configService.get<string>('RESEND_API_KEY');
     if (!apiKey) {
       this.logger.error('CRITICAL: RESEND_API_KEY is not defined in environment variables!');
-    } else {
-      this.logger.log(`MailService initialized with API Key: ${apiKey.substring(0, 7)}...`);
     }
     this.resend = new Resend(apiKey);
   }

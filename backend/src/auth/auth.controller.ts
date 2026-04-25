@@ -41,7 +41,7 @@ export class AuthController {
   }
 
   @Post('register')
-  @Throttle({ login: { limit: 5, ttl: 900000 } })
+  @Throttle({ short: { limit: 5, ttl: 900000 } })
   @ApiOperation({ summary: 'Đăng ký tài khoản mới' })
   @ResponseMessage(USER_MESSAGES.REGISTER_SUCCESS)
   @ApiResponse({ status: 201 })
@@ -50,7 +50,7 @@ export class AuthController {
   }
 
   @Post('login')
-  @Throttle({ login: { limit: 5, ttl: 900000 } })
+  @Throttle({ short: { limit: 5, ttl: 900000 } })
   @ApiOperation({ summary: 'Đăng nhập tài khoản' })
   @ResponseMessage(USER_MESSAGES.LOGIN_SUCCESS)
   @ApiResponse({ status: 200 })

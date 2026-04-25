@@ -22,6 +22,8 @@ async function bootstrap() {
     origin: [
       'https://www.thaitienshop.id.vn',
       'https://thaitienshop.id.vn',
+      'http://localhost:5173',
+      'http://localhost:3000',
       /\.vercel\.app$/,
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',

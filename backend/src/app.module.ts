@@ -22,10 +22,6 @@ import { APP_GUARD } from '@nestjs/core';
       name: 'short',
       ttl: 60000,
       limit: 1000, // Tăng mạnh lên 1000 để thoải mái sử dụng
-    }, {
-      name: 'login',
-      ttl: 900000, // 15 phút
-      limit: 5,   // 5 lần thử
     }]),
     PrismaModule,
     AuthModule,

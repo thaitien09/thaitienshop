@@ -19,7 +19,12 @@ async function bootstrap() {
 
   // 0. Bật CORS
   app.enableCors({
-    origin: '*',
+    origin: [
+      'https://www.thaitienshop.id.vn',
+      'https://thaitienshop.id.vn',
+      /\.vercel\.app$/,
+    ],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
 

@@ -5,6 +5,7 @@ import { ValidationPipe, ClassSerializerInterceptor } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Reflector } from '@nestjs/core';
 import { TransformInterceptor } from './interceptors/transform.interceptor';
+import { HttpExceptionFilter } from './filters/http-exception.filter';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import helmet from 'helmet';
 
@@ -41,6 +42,7 @@ async function bootstrap() {
   const reflector = app.get(Reflector);
   app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
   app.useGlobalInterceptors(new TransformInterceptor(reflector));
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   // 3. Cấu hình Swagger 
   const config = new DocumentBuilder()

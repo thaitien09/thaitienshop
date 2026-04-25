@@ -16,6 +16,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { HealthController } from './health/health.controller';
 
 @Module({
   imports: [
@@ -46,12 +47,12 @@ import { APP_GUARD } from '@nestjs/core';
     PaymentModule,
     DashboardModule
   ],
-  controllers: [],
+  controllers: [HealthController],
   providers: [
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: ThrottlerGuard,
-    // },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule { }

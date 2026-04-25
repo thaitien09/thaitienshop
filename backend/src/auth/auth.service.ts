@@ -109,6 +109,7 @@ export class AuthService {
       data: { emailVerificationToken: newToken },
     });
 
+    this.logger.log(`MÃ XÁC THỰC MỚI CHO ${user.email} LÀ: ${newToken}`);
     await this.mailService.sendWelcomeEmail(user.email, user.name || 'Thành viên mới', newToken);
 
     return { message: 'Mã xác thực mới đã được gửi thành công!' };

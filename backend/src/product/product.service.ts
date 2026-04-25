@@ -40,7 +40,7 @@ export class ProductService {
   }
 
   async findAll(page: number = 1, limit: number = 9) {
-    const skip = (page - 1) * limit;
+    const skip = (Number(page) - 1) * Number(limit);
     
     const [data, total] = await Promise.all([
       this.prisma.product.findMany({

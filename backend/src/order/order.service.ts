@@ -93,7 +93,7 @@ export class OrderService {
   }
 
   async findAll(page: number = 1, limit: number = 9, userId?: string) {
-    const skip = (page - 1) * limit;
+    const skip = (Number(page) - 1) * Number(limit);
     const where = userId ? { userId } : {};
 
     const [data, total] = await Promise.all([
@@ -104,7 +104,9 @@ export class OrderService {
         include: {
           items: {
             include: {
-              product: true,
+              product: {
+                include: { brand: true }
+              },
             },
           },
         },

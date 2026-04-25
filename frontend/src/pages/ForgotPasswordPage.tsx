@@ -14,7 +14,7 @@ const ForgotPasswordPage: React.FC = () => {
     setLoading(true);
     try {
       await api.post('/auth/forgot-password', values);
-      message.success('Nếu email tồn tại, mã khôi phục đã được gửi!');
+      message.success('Mã khôi phục đã được gửi! Vui lòng kiểm tra email của bạn.');
       // Điều hướng sang trang Reset Password
       navigate(`/reset-password?email=${values.email}`);
     } catch (error: any) {

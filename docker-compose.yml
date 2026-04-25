@@ -7,7 +7,7 @@ services:
     restart: always
     environment:
       MYSQL_DATABASE: thaitienshop
-      MYSQL_ROOT_PASSWORD: your_strong_password
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     ports:
       - "3307:3306"
     volumes:
@@ -20,12 +20,7 @@ services:
     restart: always
     ports:
       - "3000:3000"
-    environment:
-      DATABASE_URL: mysql://root:your_strong_password@db:3306/thaitienshop
-      PORT: 3000
-      JWT_ACCESS_SECRET: your_access_secret
-      JWT_REFRESH_SECRET: your_refresh_secret
-      # Thêm các biến môi trường khác từ file .env của bạn vào đây
+    env_file: .env
     depends_on:
       - db
 

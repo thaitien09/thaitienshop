@@ -12,16 +12,27 @@ import { UploadModule } from './upload/upload.module';
 import { OrderModule } from './order/order.module';
 import { PaymentModule } from './payment/payment.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-redis-yet';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      useFactory: async () => ({
+        store: await redisStore({
+          url: 'redis://redis:6379',
+          ttl: 3600 * 1000, // Cache trong 1 tiếng mặc định
+        }),
+      }),
+    }),
     ThrottlerModule.forRoot([{
       name: 'short',
       ttl: 60000,
-      limit: 10000, // Tăng mạnh lên 10.000 để test thoải mái
+      limit: 2000, // Giới hạn an toàn 2.000 yêu cầu/phút
     }]),
     PrismaModule,
     AuthModule,
@@ -37,10 +48,10 @@ import { APP_GUARD } from '@nestjs/core';
   ],
   controllers: [],
   providers: [
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: ThrottlerGuard,
-    // },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule { }

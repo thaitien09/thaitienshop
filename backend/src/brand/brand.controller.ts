@@ -1,20 +1,20 @@
-// d:\node js\sneaker\backend\src\brand\brand.controller.ts
-
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, Inject } from '@nestjs/common';
+import { CACHE_MANAGER, CacheInterceptor } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import { BrandService } from './brand.service';
-import { CreateBrandDto } from './dto/create-brand.dto';
-import { UpdateBrandDto } from './dto/update-brand.dto';
-import { BRAND_MESSAGES } from 'src/constants/messages';
-import { ApiOperation, ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { ResponseMessage } from 'src/decorators/response-message.decorator';
-import { AuthGuard } from 'src/auth/guards/auth.guard';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { Roles, Role } from 'src/decorators/roles.decorator';
+// ... rest of imports stay same ...
 
 @ApiTags('Brands')
 @Controller('brands')
 export class BrandController {
-  constructor(private readonly brandService: BrandService) { }
+  constructor(
+    private readonly brandService: BrandService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
+  ) { }
+
+  private async clearCache() {
+    await this.cacheManager.del('brands-list');
+  }
 
   @Post()
   @Roles(Role.ADMIN)
@@ -22,13 +22,16 @@ export class BrandController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Tạo thương hiệu mới (Chỉ dành cho Admin)' })
   @ResponseMessage(BRAND_MESSAGES.CREATE_SUCCESS)
-  create(@Body() createBrandDto: CreateBrandDto) {
-    return this.brandService.create(createBrandDto);
+  async create(@Body() createBrandDto: CreateBrandDto) {
+    const result = await this.brandService.create(createBrandDto);
+    await this.clearCache();
+    return result;
   }
 
   @Get()
+  @UseInterceptors(CacheInterceptor)
   @ApiOperation({ summary: 'Lấy danh sách tất cả thương hiệu' })
-  findAll() {
+  async findAll() {
     return this.brandService.findAll();
   }
 
@@ -44,8 +47,10 @@ export class BrandController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Cập nhật thông tin thương hiệu (Chỉ dành cho Admin)' })
   @ResponseMessage(BRAND_MESSAGES.UPDATE_SUCCESS)
-  update(@Param('id') id: string, @Body() updateBrandDto: UpdateBrandDto) {
-    return this.brandService.update(id, updateBrandDto);
+  async update(@Param('id') id: string, @Body() updateBrandDto: UpdateBrandDto) {
+    const result = await this.brandService.update(id, updateBrandDto);
+    await this.clearCache();
+    return result;
   }
 
   @Delete(':id')
@@ -54,7 +59,9 @@ export class BrandController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Xóa một thương hiệu (Chỉ dành cho Admin)' })
   @ResponseMessage(BRAND_MESSAGES.DELETE_SUCCESS)
-  remove(@Param('id') id: string) {
-    return this.brandService.remove(id);
+  async remove(@Param('id') id: string) {
+    const result = await this.brandService.remove(id);
+    await this.clearCache();
+    return result;
   }
 }

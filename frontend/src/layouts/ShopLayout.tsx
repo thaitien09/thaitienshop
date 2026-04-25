@@ -1,5 +1,5 @@
-import React from 'react';
-import { Layout, Button, Badge, Input, Dropdown, Avatar } from 'antd';
+import React, { useState } from 'react';
+import { Layout, Button, Badge, Input, Dropdown, Avatar, Drawer } from 'antd';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { 
   ShoppingCart, 
@@ -9,7 +9,8 @@ import {
   Menu as MenuIcon,
   Mail,
   ChevronDown,
-  ShoppingBag
+  ShoppingBag,
+  X
 } from 'lucide-react';
 import { FaFacebook, FaInstagram, FaXTwitter } from 'react-icons/fa6';
 import { useAuth } from '../context/AuthContext';
@@ -21,11 +22,14 @@ const ShopLayout: React.FC = () => {
   const { user, logout } = useAuth();
   const { totalItems } = useCart();
   const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
+
+  const closeMobileMenu = () => setMobileMenuOpen(false);
 
   const userMenuItems: any[] = [
     ...(user?.role === 'ADMIN' ? [{
@@ -60,15 +64,15 @@ const ShopLayout: React.FC = () => {
   return (
     <Layout className="min-h-screen bg-white">
       {/* Header - White Background & Black Text */}
-      <Header className="bg-white border-b border-gray-100 flex items-center justify-between px-4 md:px-12 sticky top-0 z-50 h-24">
+      <Header className="bg-white border-b border-gray-100 flex items-center justify-between px-4 md:px-12 sticky top-0 z-50 h-20 md:h-24">
         {/* Logo Left */}
         <div className="flex-1 flex items-center">
           <Link to="/" className="flex items-center gap-2 py-2">
-            <img src="/logo.png" alt="Thai Tien Shop" className="h-20 w-auto object-contain mix-blend-multiply" />
+            <img src="/logo.png" alt="Thai Tien Shop" className="h-16 md:h-20 w-auto object-contain mix-blend-multiply" />
           </Link>
         </div>
 
-        {/* Menu Center */}
+        {/* Menu Center (Desktop) */}
         <nav className="hidden md:flex items-center gap-10">
           <Link to="/" className="text-[12px] font-bold text-black hover:text-gray-400 transition-colors uppercase tracking-[0.2em]">Trang chủ</Link>
           <a href="#contact" className="text-[12px] font-bold text-black hover:text-gray-400 transition-colors uppercase tracking-[0.2em]">Liên hệ</a>
@@ -103,11 +107,86 @@ const ShopLayout: React.FC = () => {
             </Dropdown>
           )}
           
-          <button className="md:hidden p-2 text-black">
+          <button 
+            className="md:hidden p-2 text-black hover:bg-gray-50 rounded-full transition-colors"
+            onClick={() => setMobileMenuOpen(true)}
+          >
             <MenuIcon size={24} />
           </button>
         </div>
       </Header>
+
+      {/* Mobile Menu Drawer */}
+      <Drawer
+        title={
+          <div className="flex items-center justify-between">
+            <span className="text-[14px] font-black uppercase tracking-widest">Menu</span>
+            <Button type="text" onClick={closeMobileMenu} icon={<X size={20} />} />
+          </div>
+        }
+        placement="right"
+        onClose={closeMobileMenu}
+        open={mobileMenuOpen}
+        closeIcon={null}
+        width="80%"
+        styles={{
+          body: { padding: 0 }
+        }}
+      >
+        <div className="flex flex-col p-8 gap-8">
+          <Link 
+            to="/" 
+            className="text-[18px] font-black uppercase tracking-[0.2em] text-black"
+            onClick={closeMobileMenu}
+          >
+            Trang chủ
+          </Link>
+          <a 
+            href="#contact" 
+            className="text-[18px] font-black uppercase tracking-[0.2em] text-black"
+            onClick={closeMobileMenu}
+          >
+            Liên hệ
+          </a>
+          
+          <div className="mt-10 pt-10 border-t border-gray-100">
+            <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-6">Tài khoản</h4>
+            {!user ? (
+              <Button 
+                block 
+                size="large" 
+                className="bg-black text-white font-bold uppercase text-[12px] tracking-widest h-14 rounded-sm"
+                onClick={() => {
+                  closeMobileMenu();
+                  navigate('/login');
+                }}
+              >
+                Đăng nhập
+              </Button>
+            ) : (
+              <div className="space-y-4">
+                <Link to="/profile" onClick={closeMobileMenu} className="flex items-center gap-3 text-gray-600 font-bold uppercase text-[12px]">
+                  <UserIcon size={18} /> Thông tin cá nhân
+                </Link>
+                <Link to="/my-orders" onClick={closeMobileMenu} className="flex items-center gap-3 text-gray-600 font-bold uppercase text-[12px]">
+                  <ShoppingBag size={18} /> Đơn hàng của tôi
+                </Link>
+                <Button 
+                  block 
+                  danger 
+                  className="mt-4 font-bold uppercase text-[11px] tracking-widest"
+                  onClick={() => {
+                    closeMobileMenu();
+                    handleLogout();
+                  }}
+                >
+                  Đăng xuất
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </Drawer>
 
       <Content className="bg-white">
         <Outlet />

@@ -45,8 +45,12 @@ jobs:
             echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
             echo "GOOGLE_CALLBACK_URL=https://www.thaitienshop.id.vn/auth/google/callback" >> .env
             
+            # Dọn dẹp container cũ (tránh lỗi Conflict)
+            sudo docker compose down --remove-orphans 2>/dev/null || true
+            sudo docker rm -f thaitien_backend thaitien_db thaitien_redis 2>/dev/null || true
+            sudo docker container prune -f 2>/dev/null || true
+            
             # Khởi động hệ thống
-            sudo docker compose down --remove-orphans
             sudo docker compose up -d --build
             sudo docker image prune -f
           EOF

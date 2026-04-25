@@ -46,7 +46,7 @@ export class MailService {
         `,
       });
     } catch (err) {
-      this.logger.error('Lỗi khi gọi API Resend:', err);
+      this.logger.error('Lỗi chi tiết từ Resend:', JSON.stringify(err, null, 2));
     }
   }
 

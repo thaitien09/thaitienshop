@@ -14,11 +14,8 @@ export class MailService {
 
   async sendWelcomeEmail(email: string, name: string, token: string) {
     try {
-      console.log(`[MailService] Email chào mừng đã được gửi tới ${email}`);
-      console.log(`\x1b[36m%s\x1b[0m`, `[MailService] [DEVELOPMENT] Mã xác thực: ${token}`);
-
       await this.resend.emails.send({
-        from: 'Thai Tien Shop <onboarding@resend.dev>',
+        from: 'Thai Tien Shop <no-reply@thaitienshop.id.vn>',
         to: email,
         subject: 'Xác thực tài khoản Thai Tien Shop của bạn',
         html: `
@@ -55,11 +52,8 @@ export class MailService {
 
   async sendResetPasswordEmail(email: string, name: string, token: string) {
     try {
-      console.log(`[MailService] Email khôi phục mật khẩu đã được gửi tới ${email}`);
-      console.log(`\x1b[36m%s\x1b[0m`, `[MailService] [DEVELOPMENT] Mã khôi phục: ${token}`);
-
       await this.resend.emails.send({
-        from: 'Thai Tien Shop <onboarding@resend.dev>',
+        from: 'Thai Tien Shop <no-reply@thaitienshop.id.vn>',
         to: email,
         subject: 'Yêu cầu khôi phục mật khẩu - Thai Tien Shop',
         html: `

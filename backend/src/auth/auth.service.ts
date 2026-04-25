@@ -12,6 +12,8 @@ import { GoogleAuthService } from './google-auth.service';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
@@ -44,6 +46,7 @@ export class AuthService {
     });
 
     try {
+      this.logger.log(`MÃ XÁC THỰC CHO ${user.email} LÀ: ${verificationToken}`);
       await this.mailService.sendWelcomeEmail(user.email, user.name || 'Thành viên mới', verificationToken);
     } catch (error) {
       // Rollback nếu gửi mail lỗi

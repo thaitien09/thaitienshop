@@ -2,7 +2,30 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterc
 import { CACHE_MANAGER, CacheInterceptor } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { ProductService } from './product.service';
-// ... rest of imports stay same ...
+import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { ApiOperation, ApiBearerAuth, ApiTags, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { ResponseMessage } from 'src/decorators/response-message.decorator';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles, Role } from 'src/decorators/roles.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
+import { UploadService } from '../upload/upload.service';
+
+const imageUploadOptions = {
+  storage: memoryStorage(),
+  limits: {
+    fileSize: 2 * 1024 * 1024, // Giới hạn 2MB
+  },
+  fileFilter: (req: any, file: any, cb: any) => {
+    if (file.mimetype.match(/\/(jpg|jpeg|png|webp)$/)) {
+      cb(null, true);
+    } else {
+      cb(new BadRequestException('Chỉ chấp nhận file ảnh (jpg, jpeg, png, webp)!'), false);
+    }
+  },
+};
 
 @ApiTags('Products')
 @Controller('products')
@@ -15,7 +38,12 @@ export class ProductController {
 
   private async clearCache() {
     // Xóa cache danh sách sản phẩm khi có thay đổi
-    await this.cacheManager.del('products-list');
+    // NestJS CacheInterceptor dùng URL làm key, nên chúng ta xóa các key bắt đầu bằng /api/products
+    const keys: string[] = await this.cacheManager.store.keys() as any;
+    const productsKeys = keys.filter(key => key.includes('/api/products'));
+    for (const key of productsKeys) {
+      await this.cacheManager.del(key);
+    }
   }
 
   @Post()
@@ -24,7 +52,23 @@ export class ProductController {
   @ApiBearerAuth()
   @UseInterceptors(FileInterceptor('image', imageUploadOptions))
   @ApiConsumes('multipart/form-data')
-  // ... ApiBody stays same ...
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        slug: { type: 'string' },
+        description: { type: 'string' },
+        price: { type: 'number' },
+        currentStock: { type: 'number' },
+        brandId: { type: 'string' },
+        image: {
+          type: 'string',
+          format: 'binary',
+        }
+      },
+    },
+  })
   @ApiOperation({ summary: 'Tạo sản phẩm mới và Ảnh (Admin)' })
   @ResponseMessage('Tạo sản phẩm thành công!')
   async create(

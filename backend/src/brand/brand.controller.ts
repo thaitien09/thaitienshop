@@ -2,7 +2,14 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterc
 import { CACHE_MANAGER, CacheInterceptor } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { BrandService } from './brand.service';
-// ... rest of imports stay same ...
+import { CreateBrandDto } from './dto/create-brand.dto';
+import { UpdateBrandDto } from './dto/update-brand.dto';
+import { BRAND_MESSAGES } from 'src/constants/messages';
+import { ApiOperation, ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ResponseMessage } from 'src/decorators/response-message.decorator';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles, Role } from 'src/decorators/roles.decorator';
 
 @ApiTags('Brands')
 @Controller('brands')
@@ -13,7 +20,12 @@ export class BrandController {
   ) { }
 
   private async clearCache() {
-    await this.cacheManager.del('brands-list');
+    // NestJS CacheInterceptor dùng URL làm key, nên chúng ta xóa các key bắt đầu bằng /api/brands
+    const keys: string[] = await this.cacheManager.store.keys() as any;
+    const brandsKeys = keys.filter(key => key.includes('/api/brands'));
+    for (const key of brandsKeys) {
+      await this.cacheManager.del(key);
+    }
   }
 
   @Post()

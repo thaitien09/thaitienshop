@@ -1,5 +1,6 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '../generated/prisma/index.js';
+import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 
 @Injectable()
 export class PrismaService
@@ -7,11 +8,9 @@ export class PrismaService
   implements OnModuleInit, OnModuleDestroy
 {
   constructor() {
-    // Prisma 7: Kết nối trực tiếp qua DATABASE_URL trong .env (không cần adapter cho MySQL tiêu chuẩn)
-    super({
-      log: ['info', 'warn', 'error'],
-      errorFormat: 'pretty',
-    });
+    // Khôi phục adapter vì Prisma Client bản này bắt buộc phải có driver adapter
+    const adapter = new PrismaMariaDb(process.env.DATABASE_URL!);
+    super({ adapter, log: ['info', 'warn', 'error'] });
   }
 
   async onModuleInit() {

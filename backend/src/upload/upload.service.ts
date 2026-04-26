@@ -9,22 +9,25 @@ export class UploadService {
   private bucketName: string;
 
   constructor(private configService: ConfigService) {
-    const region = this.configService.get<string>('AWS_REGION') || '';
-    const accessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID') || '';
-    const secretAccessKey = this.configService.get<string>('AWS_SECRET_ACCESS_KEY') || '';
-    this.bucketName = this.configService.get<string>('AWS_S3_BUCKET_NAME') || '';
+    const region = this.configService.get<string>('AWS_REGION') || 'ap-southeast-1';
+    const accessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID');
+    const secretAccessKey = this.configService.get<string>('AWS_SECRET_ACCESS_KEY');
+    this.bucketName = this.configService.get<string>('AWS_S3_BUCKET_NAME') || 'thaitienshop-storage';
 
-    if (!region || !accessKeyId || !secretAccessKey || !this.bucketName) {
-      console.warn('⚠️ AWS S3 configuration is incomplete. Uploads will fail.');
-    }
+    const s3Config: any = { region };
 
-    this.s3Client = new S3Client({
-      region,
-      credentials: {
+    // Nếu có Key trong .env thì dùng, không thì để SDK tự tìm trong IAM Role
+    if (accessKeyId && secretAccessKey) {
+      s3Config.credentials = {
         accessKeyId,
         secretAccessKey,
-      },
-    });
+      };
+      console.log('✅ S3 initialized with Environment Credentials');
+    } else {
+      console.log('ℹ️ S3 initialized with IAM Role / Default Provider Chain');
+    }
+
+    this.s3Client = new S3Client(s3Config);
   }
 
   async uploadFile(file: Express.Multer.File): Promise<string> {

@@ -12,19 +12,15 @@ export class UploadService {
     const region = this.configService.get<string>('AWS_REGION') || 'ap-southeast-1';
     const accessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID');
     const secretAccessKey = this.configService.get<string>('AWS_SECRET_ACCESS_KEY');
-    this.bucketName = this.configService.get<string>('AWS_S3_BUCKET_NAME') || 'thaitienshop-storage';
+    this.bucketName = this.configService.get<string>('AWS_S3_BUCKET_NAME') || 'wax-elite-storage';
 
     const s3Config: any = { region };
 
-    // Nếu có Key trong .env thì dùng, không thì để SDK tự tìm trong IAM Role
     if (accessKeyId && secretAccessKey) {
       s3Config.credentials = {
         accessKeyId,
         secretAccessKey,
       };
-      console.log('✅ S3 initialized with Environment Credentials');
-    } else {
-      console.log('ℹ️ S3 initialized with IAM Role / Default Provider Chain');
     }
 
     this.s3Client = new S3Client(s3Config);
@@ -45,13 +41,12 @@ export class UploadService {
         Key: key,
         Body: file.buffer,
         ContentType: file.mimetype,
-        ACL: 'public-read', // Đảm bảo Bucket cho phép public-read
       });
 
       await this.s3Client.send(command);
 
-      // Trả về URL của file trên S3
-      return `https://${this.bucketName}.s3.${this.configService.get('AWS_REGION')}.amazonaws.com/${key}`;
+      const region = this.configService.get<string>('AWS_REGION') || 'ap-southeast-1';
+      return `https://${this.bucketName}.s3.${region}.amazonaws.com/${key}`;
     } catch (error) {
       console.error('❌ S3 Upload Error:', error);
       throw new BadRequestException('Lỗi khi tải ảnh lên S3');

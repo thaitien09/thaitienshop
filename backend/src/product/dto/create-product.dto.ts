@@ -1,53 +1,51 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsNotEmpty, IsOptional, IsArray, ValidateNested, IsNumber, Min } from "class-validator";
-import { Type, Transform, plainToInstance } from "class-transformer";
+import { IsString, IsNotEmpty, IsOptional, IsNumber, Min } from "class-validator";
+import { Type } from "class-transformer";
 
-// Bước 1: Định nghĩa cấu trúc cho từng Biến thể (Size, Giá, Kho)
 export class CreateProductDto {
-    @ApiProperty({ example: 'iPhone 15 Pro Max' })
+    @ApiProperty({ example: 'Reuzel Blue Strong Hold Water Soluble Pomade' })
     @IsNotEmpty({ message: 'Tên sản phẩm không được để trống' })
     @IsString()
     name: string;
 
-    @ApiProperty({ example: 'iphone-15-pro-max' })
-    @IsNotEmpty()
+    @ApiProperty({ example: 'reuzel-blue-pomade' })
+    @IsNotEmpty({ message: 'Slug không được để trống' })
     @IsString()
     slug: string;
 
-    @ApiProperty({ example: 'Sản phẩm cao cấp từ Apple...' })
+    @ApiProperty({ example: 'Dòng Pomade gốc nước cao cấp, giữ nếp cực tốt và độ bóng cao...' })
     @IsOptional()
     @IsString()
     description: string;
 
-    @ApiProperty({ example: 'https://link-anh.jpg' })
+    @ApiProperty({ example: 'https://thaitienshop.id.vn/uploads/reuzel-blue.jpg' })
     @IsOptional()
     @IsString()
     image: string;
 
-    @ApiProperty({ example: 35000000 })
+    @ApiProperty({ example: 450000 })
     @IsNumber()
     @Min(0)
     @IsNotEmpty()
     @Type(() => Number)
     price: number;
 
-    @ApiProperty({ example: 25000000 })
+    @ApiProperty({ example: 320000 })
     @IsOptional()
     @IsNumber()
     @Min(0)
     @Type(() => Number)
     costPrice: number;
 
-    @ApiProperty({ example: 10 })
+    @ApiProperty({ example: 50 })
     @IsOptional()
     @IsNumber()
     @Min(0)
     @Type(() => Number)
     currentStock: number;
 
-    @ApiProperty({ description: 'ID của thương hiệu' })
+    @ApiProperty({ description: 'ID của thương hiệu (ví dụ ID của Reuzel)' })
     @IsNotEmpty()
     @IsString()
     brandId: string;
 }
-

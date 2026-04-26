@@ -16,7 +16,6 @@ export const HomePage: React.FC = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [activeBrand, setActiveBrand] = useState('Tất cả');
   const [priceFilter, setPriceFilter] = useState('all');
-  const [stockFilter, setStockFilter] = useState('all');
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
@@ -31,7 +30,6 @@ export const HomePage: React.FC = () => {
       });
       
       if (activeBrand !== 'Tất cả') params.append('brandId', activeBrand);
-      if (stockFilter !== 'all') params.append('stockStatus', stockFilter);
       
       if (priceFilter === 'under200') params.append('maxPrice', '200000');
       else if (priceFilter === '200to400') {
@@ -62,7 +60,7 @@ export const HomePage: React.FC = () => {
 
   useEffect(() => {
     fetchProducts(currentPage);
-  }, [currentPage, activeBrand, priceFilter, stockFilter]);
+  }, [currentPage, activeBrand, priceFilter]);
 
   const displayProducts = Array.isArray(products) ? products : [];
 
@@ -70,17 +68,15 @@ export const HomePage: React.FC = () => {
     setCurrentPage(1);
     if (type === 'brand') setActiveBrand(value);
     if (type === 'price') setPriceFilter(value);
-    if (type === 'stock') setStockFilter(value);
   };
 
   const clearAllFilters = () => {
     setActiveBrand('Tất cả');
     setPriceFilter('all');
-    setStockFilter('all');
     setCurrentPage(1);
   };
 
-  const hasActiveFilter = activeBrand !== 'Tất cả' || priceFilter !== 'all' || stockFilter !== 'all';
+  const hasActiveFilter = activeBrand !== 'Tất cả' || priceFilter !== 'all';
 
   return (
     <div className="px-4 md:px-12 py-10">
@@ -143,22 +139,6 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Tình trạng */}
-            <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.25em] text-black mb-4 border-b border-gray-100 pb-3">Tình trạng</p>
-              <div className="space-y-1">
-                {[
-                  { label: 'Tất cả', value: 'all' },
-                  { label: 'Còn hàng', value: 'instock' },
-                  { label: 'Hết hàng', value: 'outstock' },
-                ].map(opt => (
-                  <button key={opt.value} onClick={() => handleFilterChange('stock', opt.value)}
-                    className={`w-full text-left text-[12px] py-1.5 px-3 rounded-sm transition-all font-medium ${stockFilter === opt.value ? 'bg-black text-white' : 'text-gray-500 hover:text-black hover:bg-gray-50'}`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
             </div>
 
           </div>

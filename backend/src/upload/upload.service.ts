@@ -10,20 +10,21 @@ export class UploadService {
 
   constructor(private configService: ConfigService) {
     const region = this.configService.get<string>('AWS_REGION') || 'ap-southeast-1';
-    const accessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID');
-    const secretAccessKey = this.configService.get<string>('AWS_SECRET_ACCESS_KEY');
-    this.bucketName = this.configService.get<string>('AWS_S3_BUCKET_NAME') || 'wax-elite-storage';
+    const accessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID') || '';
+    const secretAccessKey = this.configService.get<string>('AWS_SECRET_ACCESS_KEY') || '';
+    this.bucketName = this.configService.get<string>('AWS_S3_BUCKET_NAME') || '';
 
-    const s3Config: any = { region };
-
-    if (accessKeyId && secretAccessKey) {
-      s3Config.credentials = {
-        accessKeyId,
-        secretAccessKey,
-      };
+    if (!region || !accessKeyId || !secretAccessKey || !this.bucketName) {
+      console.warn('⚠️ AWS S3 configuration is incomplete. Uploads will fail.');
     }
 
-    this.s3Client = new S3Client(s3Config);
+    this.s3Client = new S3Client({
+      region,
+      credentials: {
+        accessKeyId,
+        secretAccessKey,
+      },
+    });
   }
 
   async uploadFile(file: Express.Multer.File): Promise<string> {
@@ -41,11 +42,13 @@ export class UploadService {
         Key: key,
         Body: file.buffer,
         ContentType: file.mimetype,
+        ACL: 'public-read', // Đảm bảo Bucket cho phép public-read
       });
 
       await this.s3Client.send(command);
 
       const region = this.configService.get<string>('AWS_REGION') || 'ap-southeast-1';
+      // Trả về URL của file trên S3
       return `https://${this.bucketName}.s3.${region}.amazonaws.com/${key}`;
     } catch (error) {
       console.error('❌ S3 Upload Error:', error);

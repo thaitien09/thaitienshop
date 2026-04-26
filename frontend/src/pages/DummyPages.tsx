@@ -16,6 +16,7 @@ export const HomePage: React.FC = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [activeBrand, setActiveBrand] = useState('Tất cả');
   const [priceFilter, setPriceFilter] = useState('all');
+  const [sortFilter, setSortFilter] = useState('all');
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
@@ -30,6 +31,7 @@ export const HomePage: React.FC = () => {
       });
       
       if (activeBrand !== 'Tất cả') params.append('brandId', activeBrand);
+      if (sortFilter !== 'all') params.append('sort', sortFilter);
       
       if (priceFilter === 'under200') params.append('maxPrice', '200000');
       else if (priceFilter === '200to400') {
@@ -60,7 +62,7 @@ export const HomePage: React.FC = () => {
 
   useEffect(() => {
     fetchProducts(currentPage);
-  }, [currentPage, activeBrand, priceFilter]);
+  }, [currentPage, activeBrand, priceFilter, sortFilter]);
 
   const displayProducts = Array.isArray(products) ? products : [];
 
@@ -68,15 +70,17 @@ export const HomePage: React.FC = () => {
     setCurrentPage(1);
     if (type === 'brand') setActiveBrand(value);
     if (type === 'price') setPriceFilter(value);
+    if (type === 'sort') setSortFilter(value);
   };
 
   const clearAllFilters = () => {
     setActiveBrand('Tất cả');
     setPriceFilter('all');
+    setSortFilter('all');
     setCurrentPage(1);
   };
 
-  const hasActiveFilter = activeBrand !== 'Tất cả' || priceFilter !== 'all';
+  const hasActiveFilter = activeBrand !== 'Tất cả' || priceFilter !== 'all' || sortFilter !== 'all';
 
   return (
     <div className="px-4 md:px-12 py-10">
@@ -139,6 +143,22 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
 
+            {/* Sắp xếp */}
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-[0.25em] text-black mb-4 border-b border-gray-100 pb-3">Sắp xếp theo giá</p>
+              <div className="space-y-1">
+                {[
+                  { label: 'Mới nhất', value: 'all' },
+                  { label: 'Giá: Thấp đến Cao', value: 'price_asc' },
+                  { label: 'Giá: Cao đến Thấp', value: 'price_desc' },
+                ].map(opt => (
+                  <button key={opt.value} onClick={() => handleFilterChange('sort', opt.value)}
+                    className={`w-full text-left text-[12px] py-1.5 px-3 rounded-sm transition-all font-medium ${sortFilter === opt.value ? 'bg-black text-white' : 'text-gray-500 hover:text-black hover:bg-gray-50'}`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
           </div>

@@ -89,8 +89,9 @@ export class ProductController {
     @Query('minPrice') minPrice?: number,
     @Query('maxPrice') maxPrice?: number,
     @Query('stockStatus') stockStatus?: string,
+    @Query('sort') sort?: string,
   ) {
-    return this.productService.findAll(page, limit, search, brandId, minPrice, maxPrice, stockStatus);
+    return this.productService.findAll(page, limit, search, brandId, minPrice, maxPrice, stockStatus, sort);
   }
 
   @Get(':id')

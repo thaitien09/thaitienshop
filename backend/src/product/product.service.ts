@@ -46,7 +46,8 @@ export class ProductService {
     brandId?: string,
     minPrice?: number,
     maxPrice?: number,
-    stockStatus?: string
+    stockStatus?: string,
+    sort?: string
   ) {
     const skip = (Number(page) - 1) * Number(limit);
     
@@ -68,6 +69,14 @@ export class ProductService {
       where.currentStock = { lte: 0 };
     }
 
+    // Xử lý sắp xếp
+    let orderBy: any = { createdAt: 'desc' }; // Mặc định là mới nhất
+    if (sort === 'price_asc') {
+      orderBy = { price: 'asc' };
+    } else if (sort === 'price_desc') {
+      orderBy = { price: 'desc' };
+    }
+
     const [data, total] = await Promise.all([
       this.prisma.product.findMany({
         where,
@@ -76,7 +85,7 @@ export class ProductService {
         include: {
           brand: true
         },
-        orderBy: { createdAt: 'desc' }
+        orderBy
       }),
       this.prisma.product.count({ where })
     ]);

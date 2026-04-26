@@ -1,10 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateReceiptDto } from './dto/create-receipt.dto';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class InventoryService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
+  ) { }
 
   async createReceipt(userId: string, createReceiptDto: CreateReceiptDto) {
     const { note, items } = createReceiptDto;
@@ -68,7 +73,7 @@ export class InventoryService {
       }
 
       // 3. Cập nhật tổng tiền cuối cùng cho phiếu
-      return await tx.inventoryReceipt.update({
+      const result = await tx.inventoryReceipt.update({
         where: { id: receipt.id },
         data: { totalCost },
         include: {
@@ -80,6 +85,8 @@ export class InventoryService {
           user: { select: { id: true, name: true, email: true } }
         },
       });
+      await this.cacheManager.clear();
+      return result;
     });
   }
 
@@ -158,7 +165,7 @@ export class InventoryService {
       }
 
       // Cập nhật ghi chú và tổng tiền vốn phiếu
-      return tx.inventoryReceipt.update({
+      const result = await tx.inventoryReceipt.update({
         where: { id },
         data: {
           ...(body.note !== undefined ? { note: body.note } : {}),
@@ -169,6 +176,8 @@ export class InventoryService {
           user: { select: { id: true, name: true, email: true } },
         },
       });
+      await this.cacheManager.clear();
+      return result;
     });
   }
 }

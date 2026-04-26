@@ -1,11 +1,14 @@
-import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, ForbiddenException, Inject } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class OrderService {
   constructor(
-    private prisma: PrismaService
+    private prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache
   ) {}
 
   // Hàm sinh mã đơn hàng đẹp: TT + Ngày + 4 ký tự ngẫu nhiên
@@ -88,6 +91,7 @@ export class OrderService {
         });
       }
 
+      await this.cacheManager.clear();
       return order;
     });
   }
@@ -147,10 +151,14 @@ export class OrderService {
       throw new BadRequestException('Trạng thái đơn hàng không hợp lệ');
     }
 
-    return this.prisma.order.update({
+    const result = await this.prisma.order.update({
       where: { id },
       data: { status },
     });
+    
+    // Nếu trạng thái đổi sang CANCELLED, ta cần xóa cache vì tồn kho sẽ được trả lại (thường làm trong cancelOrder nhưng tốt hơn là clear ở đây cho chắc)
+    await this.cacheManager.clear();
+    return result;
   }
 
   async cancelOrder(orderId: string, userId: string) {
@@ -188,6 +196,7 @@ export class OrderService {
         });
       }
 
+      await this.cacheManager.clear();
       return updatedOrder;
     });
   }

@@ -20,7 +20,7 @@ export const HomePage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
-  const PAGE_SIZE = 9;
+  const PAGE_SIZE = 12;
 
   const fetchProducts = async (page: number) => {
     setLoading(true);

@@ -10,7 +10,6 @@ import { BrandModule } from './brand/brand.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { UploadModule } from './upload/upload.module';
 import { OrderModule } from './order/order.module';
-import { PaymentModule } from './payment/payment.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
@@ -44,7 +43,6 @@ import { HealthController } from './health/health.controller';
     InventoryModule,
     UploadModule,
     OrderModule,
-    PaymentModule,
     DashboardModule
   ],
   controllers: [HealthController],

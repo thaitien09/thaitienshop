@@ -26,34 +26,40 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
             set -e
+            
+            # 1. Quản lý thư mục dự án
             if [ ! -d "thaitienshop" ]; then
               git clone https://oauth2:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git thaitienshop
             fi
             cd thaitienshop
+            
+            # 2. Cập nhật code mới nhất
             git remote set-url origin https://oauth2:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
             git pull origin master
             
-            # Xóa thư mục frontend vì đã deploy lên Vercel
+            # 3. Dọn dẹp frontend (đã chạy trên Vercel)
             rm -rf frontend
             
-            # Tạo file .env bí mật ngay trên server
-            echo "DATABASE_URL=mysql://root:${{ secrets.MYSQL_ROOT_PASSWORD }}@db:3306/thaitienshop" > .env
-            echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
-            echo "JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}" >> .env
-            echo "JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}" >> .env
-            echo "JWT_ACCESS_EXPIRES_IN=15m" >> .env
-            echo "JWT_REFRESH_EXPIRES_IN=7d" >> .env
-            echo "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}" >> .env
-            echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
-            echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
-            echo "GOOGLE_CALLBACK_URL=https://www.thaitienshop.id.vn/auth/google/callback" >> .env
+            # 4. Cấu hình biến môi trường
+            cat <<EOT > .env
+            DATABASE_URL=mysql://root:${{ secrets.MYSQL_ROOT_PASSWORD }}@db:3306/thaitienshop
+            MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
+            JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
+            JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
+            JWT_ACCESS_EXPIRES_IN=15m
+            JWT_REFRESH_EXPIRES_IN=7d
+            RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            GOOGLE_CALLBACK_URL=https://www.thaitienshop.id.vn/auth/google/callback
+            EOT
             
-            # Dọn dẹp container cũ (tránh lỗi Conflict)
-            sudo docker compose down --remove-orphans 2>/dev/null || true
-            sudo docker rm -f thaitien_backend thaitien_db thaitien_redis 2>/dev/null || true
-            sudo docker container prune -f 2>/dev/null || true
+            # 5. Build Image MỚI trước (Bước này tốn RAM nhất)
+            sudo docker compose build --pull backend
             
-            # Khởi động hệ thống
-            sudo docker compose up -d --build
+            # 6. Khởi động lại hệ thống
+            sudo docker compose up -d
+            
+            # 7. Dọn dẹp các Image rác
             sudo docker image prune -f
           EOF

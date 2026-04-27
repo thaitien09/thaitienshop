@@ -26,40 +26,28 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
             set -e
-            
-            # 1. Quản lý thư mục dự án
             if [ ! -d "thaitienshop" ]; then
               git clone https://oauth2:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git thaitienshop
             fi
             cd thaitienshop
-            
-            # 2. Cập nhật code mới nhất
             git remote set-url origin https://oauth2:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
             git pull origin master
-            
-            # 3. Dọn dẹp frontend (đã chạy trên Vercel)
             rm -rf frontend
-            
-            # 4. Cấu hình biến môi trường
-            cat <<EOT > .env
-            DATABASE_URL=mysql://root:${{ secrets.MYSQL_ROOT_PASSWORD }}@db:3306/thaitienshop
-            MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
-            JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
-            JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
-            JWT_ACCESS_EXPIRES_IN=15m
-            JWT_REFRESH_EXPIRES_IN=7d
-            RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
-            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
-            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
-            GOOGLE_CALLBACK_URL=https://www.thaitienshop.id.vn/auth/google/callback
-            EOT
-            
-            # 5. Build Image MỚI trước (Bước này tốn RAM nhất)
+
+            # Tạo file .env bằng printf để tránh lỗi heredoc thụt lề
+            printf "DATABASE_URL=mysql://root:${{ secrets.MYSQL_ROOT_PASSWORD }}@db:3306/thaitienshop\n" > .env
+            printf "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}\n" >> .env
+            printf "JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}\n" >> .env
+            printf "JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}\n" >> .env
+            printf "JWT_ACCESS_EXPIRES_IN=15m\n" >> .env
+            printf "JWT_REFRESH_EXPIRES_IN=7d\n" >> .env
+            printf "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}\n" >> .env
+            printf "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}\n" >> .env
+            printf "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}\n" >> .env
+            printf "GOOGLE_CALLBACK_URL=https://www.thaitienshop.id.vn/auth/google/callback\n" >> .env
+
+            # Build và khởi động lại
             sudo docker compose build --pull backend
-            
-            # 6. Khởi động lại hệ thống
             sudo docker compose up -d
-            
-            # 7. Dọn dẹp các Image rác
             sudo docker image prune -f
           EOF

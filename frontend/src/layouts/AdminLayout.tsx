@@ -41,8 +41,6 @@ const AdminLayout: React.FC = () => {
     { key: '/admin/inventory', icon: <History size={18} strokeWidth={1.5} />, label: <Link to="/admin/inventory" onClick={closeMobileMenu} className="text-[13px] font-medium">Quản lý nhập kho</Link> },
     { key: '/admin/orders', icon: <ShoppingCart size={18} strokeWidth={1.5} />, label: <Link to="/admin/orders" onClick={closeMobileMenu} className="text-[13px] font-medium">Đơn hàng mới</Link> },
     { key: '/admin/users', icon: <Users size={18} strokeWidth={1.5} />, label: <Link to="/admin/users" onClick={closeMobileMenu} className="text-[13px] font-medium">Khách hàng</Link> },
-    { key: 'divider-1', type: 'divider', className: "!my-6" },
-    { key: '/admin/settings', icon: <Settings size={18} strokeWidth={1.5} />, label: <Link to="/admin/settings" onClick={closeMobileMenu} className="text-[13px] font-medium">Hệ thống</Link> },
   ];
 
   const sidebarLogo = (
@@ -142,12 +140,13 @@ const AdminLayout: React.FC = () => {
           
           <div className="flex items-center gap-2 md:gap-6">
             <Button 
-              type="primary" 
-              className="bg-black hover:!bg-gray-800 border-none rounded-full px-3 md:px-5 text-[10px] md:text-[11px] font-bold uppercase tracking-widest h-9 md:h-10 flex items-center gap-2"
-              icon={<Store size={14} />} 
+              type="text" 
+              className="flex items-center justify-center p-2 hover:bg-gray-50 rounded-full text-black"
+              icon={<Store size={20} strokeWidth={1.5} />} 
               onClick={() => navigate('/')}
+              title="Về cửa hàng"
             >
-              <span className="hidden sm:inline">Về cửa hàng</span>
+              <span className="hidden sm:inline ml-2 text-[11px] font-bold uppercase tracking-widest">Cửa hàng</span>
             </Button>
 
             <Badge dot color="black" offset={[-2, 2]}>

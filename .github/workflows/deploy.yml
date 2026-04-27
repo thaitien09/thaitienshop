@@ -3,6 +3,10 @@ name: Deploy Thai Tien Shop to AWS
 on:
   push:
     branches: [ master ]
+    paths:
+      - 'backend/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/deploy.yml'
 
 jobs:
   deploy:
@@ -45,6 +49,10 @@ jobs:
             printf "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}\n" >> .env
             printf "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}\n" >> .env
             printf "GOOGLE_CALLBACK_URL=https://www.thaitienshop.id.vn/auth/google/callback\n" >> .env
+            printf "AWS_REGION=${{ secrets.AWS_REGION }}\n" >> .env
+            printf "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}\n" >> .env
+            printf "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}\n" >> .env
+            printf "AWS_S3_BUCKET_NAME=${{ secrets.AWS_S3_BUCKET_NAME }}\n" >> .env
 
             # Build và khởi động lại
             sudo docker compose build --pull backend

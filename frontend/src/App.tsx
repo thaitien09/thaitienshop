@@ -19,6 +19,17 @@ import InventoryManagement from './pages/admin/InventoryManagement';
 import UserManagement from './pages/admin/UserManagement';
 import OrderManagement from './pages/admin/OrderManagement';
 import { useAuth } from './context/AuthContext';
+import { useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+
+// Component tự động cuộn lên đầu trang khi chuyển Route
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
 
 function App() {
   const { user, loading } = useAuth();
@@ -27,6 +38,7 @@ function App() {
 
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         {/* Cổng vào trang Shop (Khách hàng) */}
         <Route path="/" element={<ShopLayout />}>

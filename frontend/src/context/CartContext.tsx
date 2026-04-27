@@ -40,19 +40,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCart((prevCart) => {
       const existingItem = prevCart.find((item) => item.id === product.id);
       if (existingItem) {
-        // Kiểm tra tồn kho
-        if (existingItem.quantity + 1 > (product.currentStock ?? existingItem.stock)) {
-          overStock = true;
-          return prevCart;
-        }
         return prevCart.map((item) =>
           item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
         );
-      }
-
-      if ((product.currentStock ?? 0) <= 0) {
-        overStock = true;
-        return prevCart;
       }
 
       isNew = true;
@@ -92,10 +82,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCart((prevCart) =>
       prevCart.map((item) => {
         if (item.id === productId) {
-          if (quantity > item.stock) {
-            message.warning(`Sản phẩm ${item.name} chỉ còn ${item.stock} trong kho!`);
-            return { ...item, quantity: item.stock };
-          }
           return { ...item, quantity };
         }
         return item;

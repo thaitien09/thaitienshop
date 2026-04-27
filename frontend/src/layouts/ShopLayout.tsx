@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Layout, Button, Badge, Input, Dropdown, Avatar, Drawer } from 'antd';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { 
-  ShoppingCart, 
-  User as UserIcon, 
-  LogOut, 
+import {
+  ShoppingCart,
+  User as UserIcon,
+  LogOut,
   LayoutDashboard,
   Menu as MenuIcon,
   Mail,
@@ -87,7 +87,7 @@ const ShopLayout: React.FC = () => {
           </Link>
 
           {!user ? (
-            <button 
+            <button
               onClick={() => navigate('/login')}
               className="p-2 hover:bg-gray-50 rounded-full transition-colors text-black"
             >
@@ -96,7 +96,7 @@ const ShopLayout: React.FC = () => {
           ) : (
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow>
               <div className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-1 rounded-full transition-colors ml-2">
-                <Avatar 
+                <Avatar
                   className="bg-black text-[10px] font-bold"
                   size={32}
                 >
@@ -106,8 +106,8 @@ const ShopLayout: React.FC = () => {
               </div>
             </Dropdown>
           )}
-          
-          <button 
+
+          <button
             className="md:hidden p-2 text-black hover:bg-gray-50 rounded-sm transition-colors ml-1"
             onClick={() => setMobileMenuOpen(true)}
           >
@@ -134,27 +134,27 @@ const ShopLayout: React.FC = () => {
         }}
       >
         <div className="flex flex-col p-8 gap-8">
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             className="text-[18px] font-black uppercase tracking-[0.2em] text-black"
             onClick={closeMobileMenu}
           >
             Trang chủ
           </Link>
-          <a 
-            href="#contact" 
+          <a
+            href="#contact"
             className="text-[18px] font-black uppercase tracking-[0.2em] text-black"
             onClick={closeMobileMenu}
           >
             Liên hệ
           </a>
-          
+
           <div className="mt-10 pt-10 border-t border-gray-100">
             <h4 className="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-6">Tài khoản</h4>
             {!user ? (
-              <Button 
-                block 
-                size="large" 
+              <Button
+                block
+                size="large"
                 className="bg-black text-white font-bold uppercase text-[12px] tracking-widest h-14 rounded-sm"
                 onClick={() => {
                   closeMobileMenu();
@@ -171,9 +171,9 @@ const ShopLayout: React.FC = () => {
                 <Link to="/my-orders" onClick={closeMobileMenu} className="flex items-center gap-3 text-gray-600 font-bold uppercase text-[12px]">
                   <ShoppingBag size={18} /> Đơn hàng của tôi
                 </Link>
-                <Button 
-                  block 
-                  danger 
+                <Button
+                  block
+                  danger
                   className="mt-4 font-bold uppercase text-[11px] tracking-widest"
                   onClick={() => {
                     closeMobileMenu();
@@ -239,8 +239,8 @@ const ShopLayout: React.FC = () => {
               <h4>Nhận tin mới nhất</h4>
               <p className="text-gray-500 text-[14px]">Đăng ký để nhận ưu đãi đặc biệt và tin tức sớm nhất từ Thai Tien Shop.</p>
               <div className="flex gap-2">
-                <Input 
-                  placeholder="Email của bạn" 
+                <Input
+                  placeholder="Email của bạn"
                   className="rounded-sm border-gray-200 focus:border-black"
                   prefix={<Mail size={16} className="text-gray-400 mr-2" />}
                 />
@@ -253,7 +253,7 @@ const ShopLayout: React.FC = () => {
 
           <div className="pt-8 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-gray-400 text-[11px] tracking-[0.2em] uppercase text-center md:text-left">
-              Thai Tien Shop ©{new Date().getFullYear()} — Defined by Excellence. 
+              Thai Tien Shop ©{new Date().getFullYear()} — Defined by Excellence.
             </div>
             <div className="flex gap-4 text-[11px] font-bold uppercase tracking-widest">
               <a href="#">Việt Nam</a>

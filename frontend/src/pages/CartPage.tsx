@@ -84,10 +84,9 @@ const CartPage: React.FC = () => {
       render: (_: any, record: any) => (
         <InputNumber
           min={1}
-          max={record.stock}
           value={record.quantity}
           onChange={(val) => updateQuantity(record.id, val || 1)}
-          className="rounded-sm border-gray-100"
+          className="rounded-sm border-gray-100 w-16 md:w-20"
         />
       ),
     },
@@ -120,7 +119,7 @@ const CartPage: React.FC = () => {
         <Text className="text-gray-400 text-[13px] uppercase tracking-[0.2em]">{totalItems} Sản phẩm trong túi đồ của bạn</Text>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-16">
         {/* Table Area */}
         <div className="lg:col-span-2">
           <Table 
@@ -128,6 +127,7 @@ const CartPage: React.FC = () => {
             dataSource={cart} 
             rowKey="id" 
             pagination={false}
+            scroll={{ x: 750 }}
             className="cart-table border-t border-gray-100"
           />
           <div className="mt-12">

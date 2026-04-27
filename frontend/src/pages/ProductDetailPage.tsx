@@ -120,12 +120,11 @@ const ProductDetailPage: React.FC = () => {
               <Button
                 type="primary"
                 size="large"
-                disabled={product.currentStock <= 0}
                 className="w-full h-16 bg-black text-white hover:!bg-gray-800 border-none rounded-sm text-[12px] font-bold uppercase tracking-[0.25em] flex items-center justify-center gap-3 transition-all"
                 onClick={() => addToCart(product)}
               >
                 <ShoppingCart size={18} />
-                {product.currentStock > 0 ? 'Thêm vào giỏ hàng' : 'Hết hàng'}
+                Thêm vào giỏ hàng
               </Button>
               <Button
                 size="large"

@@ -144,16 +144,16 @@ const OrderManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center mb-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 md:mb-10">
         <div>
-          <Title level={2} className="!text-[32px] font-black tracking-tighter uppercase mb-2">Quản lý đơn hàng</Title>
-          <Text className="text-gray-400 text-[13px] uppercase tracking-[0.2em]">Quản lý và xử lý đơn hàng từ khách hàng</Text>
+          <Title level={2} className="!text-[24px] md:!text-[32px] font-black tracking-tighter uppercase mb-1 md:mb-2">Quản lý đơn hàng</Title>
+          <Text className="text-gray-400 text-[11px] md:text-[13px] uppercase tracking-[0.2em]">Quản lý và xử lý đơn hàng từ khách hàng</Text>
         </div>
-        <Badge count={(Array.isArray(orders) ? orders : []).filter(o => o.status === 'PENDING').length} offset={[10, 0]}>
+        <Badge count={(Array.isArray(orders) ? orders : []).filter(o => o.status === 'PENDING').length} offset={[10, 0]} className="w-full md:w-auto">
           <Button
             icon={<ShoppingBag size={18} />}
             onClick={() => fetchOrders(currentPage)}
-            className="h-12 px-6 rounded-sm font-bold uppercase text-[11px] tracking-widest flex items-center gap-2"
+            className="h-12 px-6 rounded-sm font-bold uppercase text-[11px] tracking-widest flex items-center justify-center gap-2 w-full md:w-auto"
           >
             Làm mới danh sách
           </Button>
@@ -161,25 +161,25 @@ const OrderManagement: React.FC = () => {
       </div>
 
       <Card bordered={false} className="shadow-sm">
-        <div style={{ marginBottom: 24 }}>
-          <Title level={4} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div className="mb-6">
+          <Title level={4} className="!m-0 flex items-center gap-2">
             <ShoppingBag /> Danh sách đơn hàng
           </Title>
-          <Text type="secondary">Theo dõi và cập nhật trạng thái đơn hàng từ khách hàng</Text>
+          <Text type="secondary" className="text-xs">Theo dõi và cập nhật trạng thái đơn hàng từ khách hàng</Text>
         </div>
 
-        <div style={{ marginBottom: 16, display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+        <div className="flex flex-wrap gap-3 mb-4">
           <Input.Search
             placeholder="Tìm mã đơn, tên hoặc số điện thoại..."
             allowClear
             value={searchText}
             onChange={e => setSearchText(e.target.value)}
-            style={{ maxWidth: 350 }}
+            className="w-full md:max-w-[350px]"
           />
           <Select
             value={filterStatus}
             onChange={setFilterStatus}
-            style={{ width: 180 }}
+            className="w-full md:w-[180px]"
           >
             <Option value="all">Tất cả trạng thái</Option>
             <Option value="PENDING">Chờ xác nhận</Option>
@@ -211,11 +211,13 @@ const OrderManagement: React.FC = () => {
           })} 
           rowKey="id"
           loading={loading}
+          scroll={{ x: 900 }}
           pagination={{ 
             current: currentPage, 
             pageSize: PAGE_SIZE, 
             total: total,
-            onChange: (page) => setCurrentPage(page)
+            onChange: (page) => setCurrentPage(page),
+            size: 'small'
           }}
           className="admin-table"
         />
@@ -282,8 +284,8 @@ const OrderManagement: React.FC = () => {
               <div className="flex items-center gap-2 text-gray-400 uppercase text-[10px] font-bold tracking-widest">
                 <ShoppingBag size={14} /> Danh sách sản phẩm
               </div>
-              <div className="border border-gray-100 rounded-sm">
-                <table className="w-full text-left">
+              <div className="border border-gray-100 rounded-sm overflow-x-auto">
+                <table className="w-full text-left min-w-[500px]">
                   <thead className="bg-gray-50 text-[11px] uppercase font-bold text-gray-400">
                     <tr>
                       <th className="px-4 py-3">Sản phẩm</th>
@@ -296,14 +298,14 @@ const OrderManagement: React.FC = () => {
                     {selectedOrder.items.map((item: any) => (
                       <tr key={item.id}>
                         <td className="px-4 py-4">
-                          <Space>
+                          <div className="flex items-center gap-3">
                             <img
                               src={item.product.image ? (item.product.image.startsWith('http') ? item.product.image : `${BASE_URL}${item.product.image}`) : 'https://placehold.co/50x50'}
                               className="w-10 h-10 object-contain rounded-sm"
                               alt=""
                             />
                             <Text strong className="text-[13px]">{item.product.name}</Text>
-                          </Space>
+                          </div>
                         </td>
                         <td className="px-4 py-4 text-center">{item.quantity}</td>
                         <td className="px-4 py-4 text-right">{item.price.toLocaleString()}đ</td>

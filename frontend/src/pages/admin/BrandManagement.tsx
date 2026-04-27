@@ -171,32 +171,32 @@ const BrandManagement: React.FC = () => {
   ];
 
   return (
-    <div style={{ padding: '24px' }}>
+    <div className="p-2 md:p-6">
       <Card bordered={false} className="shadow-sm">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
           <div>
-            <Title level={4} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Title level={4} className="!m-0 flex items-center gap-2">
               <TagsOutlined /> Quản lý Thương hiệu
             </Title>
-            <Text type="secondary">Quản lý danh sách các hãng sáp trong hệ thống của bạn</Text>
+            <Text type="secondary" className="text-xs">Quản lý danh sách các hãng sáp trong hệ thống của bạn</Text>
           </div>
           <Button 
             type="primary" 
             icon={<PlusOutlined />} 
             onClick={() => showModal()}
-            style={{ borderRadius: '6px', height: '40px', background: 'black', borderColor: 'black' }}
+            className="bg-black border-black h-10 rounded-md uppercase text-[11px] font-bold tracking-widest w-full md:w-auto"
           >
             Thêm Thương hiệu
           </Button>
         </div>
 
-        <div style={{ marginBottom: 16, display: 'flex', gap: 12 }}>
+        <div className="flex flex-wrap gap-3 mb-4">
           <Input.Search
             placeholder="Tìm tên thương hiệu..."
             allowClear
             value={searchText}
             onChange={e => setSearchText(e.target.value)}
-            style={{ maxWidth: 320 }}
+            className="w-full md:max-w-[320px]"
           />
           <span style={{ lineHeight: '32px', color: '#888', fontSize: 12 }}>
             {brands.filter(b => b.name.toLowerCase().includes(searchText.toLowerCase())).length} kết quả
@@ -208,7 +208,8 @@ const BrandManagement: React.FC = () => {
           dataSource={brands.filter(b => b.name.toLowerCase().includes(searchText.toLowerCase()))} 
           rowKey="id" 
           loading={loading}
-          pagination={{ pageSize: 10 }}
+          scroll={{ x: 600 }}
+          pagination={{ pageSize: 10, size: 'small' }}
         />
       </Card>
 

@@ -213,35 +213,35 @@ const InventoryManagement: React.FC = () => {
   ];
 
   return (
-    <div style={{ padding: '24px' }}>
+    <div className="p-2 md:p-6">
       <Card bordered={false}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
+        <div className="flex flex-col md:flex-row md:justify-between gap-4 mb-6">
           <div>
-            <Title level={4}><HistoryOutlined /> Nhật ký Nhập kho</Title>
-            <Text type="secondary">Quản lý các đợt nhập hàng và điều chỉnh tồn kho</Text>
+            <Title level={4} className="!m-0 flex items-center gap-2"><HistoryOutlined /> Nhật ký Nhập kho</Title>
+            <Text type="secondary" className="text-xs">Quản lý các đợt nhập hàng và điều chỉnh tồn kho</Text>
           </div>
           <Button
             type="primary"
             icon={<PlusOutlined />}
             onClick={() => setIsModalVisible(true)}
-            style={{ background: 'black', borderColor: 'black' }}
+            className="bg-black border-black h-10 uppercase text-[11px] font-bold tracking-widest w-full md:w-auto"
           >
             Tạo Phiếu Nhập
           </Button>
         </div>
 
-        <div style={{ marginBottom: 16, display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+        <div className="flex flex-wrap gap-3 mb-4">
           <Input.Search
             placeholder="Tìm ghi chú hoặc người nhập..."
             allowClear
             value={searchText}
             onChange={e => setSearchText(e.target.value)}
-            style={{ maxWidth: 300 }}
+            className="w-full md:max-w-[300px]"
           />
           <RangePicker 
             onChange={(dates) => setDateRange(dates as any)}
             placeholder={['Từ ngày', 'Đến ngày']}
-            style={{ width: 280 }}
+            className="w-full md:w-[280px]"
           />
           <span style={{ lineHeight: '32px', color: '#888', fontSize: 12 }}>
             {receipts.filter(r => {
@@ -275,7 +275,8 @@ const InventoryManagement: React.FC = () => {
           })}
           rowKey="id"
           loading={loading}
-          pagination={{ pageSize: 8 }}
+          scroll={{ x: 800 }}
+          pagination={{ pageSize: 8, size: 'small' }}
         />
       </Card>
 
@@ -285,7 +286,9 @@ const InventoryManagement: React.FC = () => {
         open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={null}
-        width={800}
+        width={900}
+        style={{ top: 20 }}
+        className="responsive-modal"
         destroyOnClose
       >
         <Form form={form} layout="vertical" onFinish={onFinish}>
@@ -302,14 +305,9 @@ const InventoryManagement: React.FC = () => {
                   <Card
                     size="small"
                     key={key}
-                    style={{ 
-                      marginBottom: '16px', 
-                      borderRadius: '8px',
-                      border: '1px solid #f0f0f0',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
-                    }}
+                    className="mb-4 rounded-lg border-gray-100 shadow-sm"
                   >
-                    <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 80px 1fr auto', gap: '16px', alignItems: 'start' }}>
+                    <div className="grid grid-cols-1 md:grid-cols-[1.5fr_80px_1fr_auto] gap-4 items-start">
                       <Form.Item
                         {...restField}
                         name={[name, 'productId']}
@@ -363,7 +361,7 @@ const InventoryManagement: React.FC = () => {
                         danger
                         icon={<MinusCircleOutlined />}
                         onClick={() => remove(name)}
-                        style={{ marginTop: '30px' }}
+                        className="md:mt-8"
                       />
                     </div>
 
@@ -465,7 +463,8 @@ const InventoryManagement: React.FC = () => {
         open={isDetailVisible}
         onCancel={() => setIsDetailVisible(false)}
         footer={null}
-        width={700}
+        width={800}
+        style={{ top: 20 }}
       >
         {selectedReceipt && (
           <div>
@@ -477,6 +476,7 @@ const InventoryManagement: React.FC = () => {
               dataSource={selectedReceipt?.items || []}
               pagination={false}
               rowKey="id"
+              scroll={{ x: 500 }}
               columns={[
                 { title: 'Sản phẩm', render: (item: ReceiptItem) => item?.product?.name || 'N/A' },
                 { title: 'Số lượng', dataIndex: 'quantity' },
@@ -484,9 +484,9 @@ const InventoryManagement: React.FC = () => {
                 { title: 'Thành tiền', render: (item: ReceiptItem) => `${((item?.quantity || 0) * (item?.costPrice || 0)).toLocaleString()}đ` },
               ]}
               footer={() => (
-                <div style={{ textAlign: 'right' }}>
+                <div className="text-right">
                   <Text strong>Tổng cộng: </Text>
-                  <Text type="danger" strong style={{ fontSize: '18px' }}>
+                  <Text type="danger" strong className="text-lg">
                     {(selectedReceipt?.totalCost || 0).toLocaleString()}đ
                   </Text>
                 </div>
@@ -507,7 +507,8 @@ const InventoryManagement: React.FC = () => {
         open={isEditVisible}
         onCancel={() => setIsEditVisible(false)}
         footer={null}
-        width={700}
+        width={800}
+        style={{ top: 20 }}
         destroyOnClose
       >
         <Form form={editForm} layout="vertical" onFinish={onEditFinish}>
@@ -521,8 +522,8 @@ const InventoryManagement: React.FC = () => {
             {(fields) => (
               <>
                 {fields.map(({ key, name, ...restField }) => (
-                  <Card size="small" key={key} style={{ marginBottom: '12px', background: '#fafafa' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '16px', alignItems: 'end' }}>
+                  <Card size="small" key={key} className="mb-3 bg-gray-50 border-gray-100">
+                    <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr] gap-4 items-end">
                       {/* Hidden id field */}
                       <Form.Item {...restField} name={[name, 'id']} hidden><Input /></Form.Item>
 

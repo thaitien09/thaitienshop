@@ -204,34 +204,34 @@ const UserManagement: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
-          <Title level={4} className="uppercase tracking-widest font-black">Quản lý người dùng</Title>
-          <Text type="secondary">Phân quyền và kiểm soát tài khoản trong hệ thống</Text>
+          <Title level={4} className="!m-0 uppercase tracking-widest font-black">Quản lý người dùng</Title>
+          <Text type="secondary" className="text-xs">Phân quyền và kiểm soát tài khoản trong hệ thống</Text>
         </div>
         <Button 
           type="primary" 
           icon={<PlusOutlined />} 
           onClick={() => setIsModalVisible(true)}
-          className="bg-black hover:!bg-gray-800 border-none rounded-sm h-10 uppercase text-[12px] font-bold tracking-widest px-6"
+          className="bg-black hover:!bg-gray-800 border-none rounded-sm h-10 uppercase text-[12px] font-bold tracking-widest px-6 w-full md:w-auto"
         >
           Thêm người dùng
         </Button>
       </div>
 
       <Card bordered={false} className="shadow-sm overflow-hidden rounded-sm">
-        <div style={{ marginBottom: 16, display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+        <div className="flex flex-wrap gap-3 mb-4">
           <Input.Search
             placeholder="Tìm tên, email hoặc số điện thoại..."
             allowClear
             value={searchText}
             onChange={e => setSearchText(e.target.value)}
-            style={{ maxWidth: 350 }}
+            className="w-full md:max-w-[350px]"
           />
           <Select 
             value={filterRole} 
             onChange={setFilterRole} 
-            style={{ width: 140 }}
+            className="w-full md:w-[140px]"
           >
             <Option value="all">Tất cả quyền</Option>
             <Option value="ADMIN">Quản trị viên</Option>
@@ -240,7 +240,7 @@ const UserManagement: React.FC = () => {
           <Select 
             value={filterActive} 
             onChange={setFilterActive} 
-            style={{ width: 150 }}
+            className="w-full md:w-[150px]"
           >
             <Option value="all">Tất cả trạng thái</Option>
             <Option value="active">Đang hoạt động</Option>
@@ -276,7 +276,8 @@ const UserManagement: React.FC = () => {
           })} 
           rowKey="id" 
           loading={loading}
-          pagination={{ pageSize: 10 }}
+          scroll={{ x: 800 }}
+          pagination={{ pageSize: 10, size: 'small' }}
         />
       </Card>
 

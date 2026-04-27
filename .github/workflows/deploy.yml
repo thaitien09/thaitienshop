@@ -33,6 +33,9 @@ jobs:
             git remote set-url origin https://oauth2:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
             git pull origin master
             
+            # Xóa thư mục frontend vì đã deploy lên Vercel
+            rm -rf frontend
+            
             # Tạo file .env bí mật ngay trên server
             echo "DATABASE_URL=mysql://root:${{ secrets.MYSQL_ROOT_PASSWORD }}@db:3306/thaitienshop" > .env
             echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env

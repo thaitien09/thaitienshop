@@ -4,7 +4,7 @@ import { ShoppingCart, MapPin, Phone, User, CreditCard, ArrowLeft, CheckCircle2 
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
+import api, { BASE_URL } from '../services/api';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -258,7 +258,7 @@ const CheckoutPage: React.FC = () => {
                 <div key={item.id} className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-white rounded-sm p-1 border border-gray-100 flex-shrink-0">
-                      <img src={item.image ? (item.image.startsWith('http') ? item.image : `http://localhost:1102${item.image}`) : 'https://placehold.co/50x50'} alt={item.name} className="w-full h-full object-contain" />
+                      <img src={item.image ? (item.image.startsWith('http') ? item.image : `${BASE_URL}${item.image}`) : 'https://placehold.co/50x50'} alt={item.name} className="w-full h-full object-contain" />
                     </div>
                     <div>
                       <Text className="text-[12px] font-bold line-clamp-1 w-32">{item.name}</Text>

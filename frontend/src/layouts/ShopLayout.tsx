@@ -108,10 +108,10 @@ const ShopLayout: React.FC = () => {
           )}
           
           <button 
-            className="md:hidden p-2 text-black hover:bg-gray-50 rounded-full transition-colors ml-1"
+            className="md:hidden p-2 text-black hover:bg-gray-50 rounded-sm transition-colors ml-1"
             onClick={() => setMobileMenuOpen(true)}
           >
-            <MenuIcon size={22} strokeWidth={1.5} />
+            <span className="text-[11px] font-bold tracking-[0.2em] uppercase">Menu</span>
           </button>
         </div>
       </Header>

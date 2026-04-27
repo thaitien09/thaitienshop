@@ -265,37 +265,37 @@ const ProductManagement: React.FC = () => {
   ];
 
   return (
-    <div style={{ padding: '24px' }}>
+    <div className="p-2 md:p-6">
       <Card bordered={false} className="shadow-sm">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
           <div>
-            <Title level={4} style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Title level={4} className="!m-0 flex items-center gap-2">
               <ShoppingOutlined /> Quản lý Kho Sáp
             </Title>
-            <Text type="secondary">Danh sách các dòng sáp và tồn kho trong hệ thống</Text>
+            <Text type="secondary" className="text-xs">Danh sách các dòng sáp và tồn kho trong hệ thống</Text>
           </div>
           <Button
             type="primary"
             icon={<PlusOutlined />}
             onClick={showAddModal}
-            style={{ background: 'black', borderColor: 'black' }}
+            className="bg-black border-black h-10 uppercase text-[11px] font-bold tracking-widest w-full md:w-auto"
           >
             Thêm Loại Sáp
           </Button>
         </div>
 
-        <div style={{ marginBottom: 16, display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+        <div className="flex flex-wrap gap-3 mb-4">
           <Input.Search
             placeholder="Tìm tên sáp hoặc mã SKU..."
             allowClear
             value={searchText}
             onChange={e => setSearchText(e.target.value)}
-            style={{ maxWidth: 300 }}
+            className="w-full md:max-w-[300px]"
           />
           <Select 
             value={filterBrand} 
             onChange={setFilterBrand} 
-            style={{ width: 160 }}
+            className="w-full md:w-[160px]"
           >
             <Option value="all">Tất cả thương hiệu</Option>
             {(Array.isArray(brands) ? brands : []).map(b => <Option key={b.id} value={b.id}>{b.name}</Option>)}
@@ -303,7 +303,7 @@ const ProductManagement: React.FC = () => {
           <Select 
             value={filterStock} 
             onChange={setFilterStock} 
-            style={{ width: 140 }}
+            className="w-full md:w-[140px]"
           >
             <Option value="all">Tất cả tồn kho</Option>
             <Option value="instock">Còn hàng</Option>
@@ -338,11 +338,14 @@ const ProductManagement: React.FC = () => {
           })}
           rowKey="id"
           loading={loading}
+          scroll={{ x: 800 }}
+          className="admin-table"
           pagination={{ 
             current: currentPage, 
             pageSize: PAGE_SIZE, 
             total: total,
-            onChange: (page) => setCurrentPage(page)
+            onChange: (page) => setCurrentPage(page),
+            size: 'small'
           }}
         />
       </Card>
@@ -361,11 +364,13 @@ const ProductManagement: React.FC = () => {
         open={isModalVisible}
         onCancel={handleCancel}
         footer={null}
-        width={700}
+        width={800}
+        style={{ top: 20 }}
+        className="responsive-modal"
         destroyOnClose
       >
         <Form form={form} layout="vertical" onFinish={onFinish}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Form.Item name="name" label="Tên loại sáp" rules={[{ required: true, message: 'Vui lòng nhập tên sản phẩm' }]}>
               <Input placeholder="Ví dụ: Kevin Murphy Rough Rider" onChange={handleNameChange} />
             </Form.Item>
@@ -374,7 +379,7 @@ const ProductManagement: React.FC = () => {
             </Form.Item>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Form.Item name="brandId" label="Thương hiệu" rules={[{ required: true, message: 'Vui lòng chọn thương hiệu' }]}>
               <Select placeholder="Chọn thương hiệu">
                 {(Array.isArray(brands) ? brands : []).map(b => <Option key={b.id} value={b.id}>{b.name}</Option>)}

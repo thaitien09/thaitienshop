@@ -122,15 +122,15 @@ const AdminLayout: React.FC = () => {
       </Drawer>
       
       <Layout className="bg-[#fafafa]">
-        <Header className="bg-white/80 backdrop-blur-md sticky top-0 z-10 p-0 flex items-center justify-between px-4 md:px-6 border-b border-gray-100 h-20">
-          <div className="flex items-center gap-4">
+        <Header className="bg-white/80 backdrop-blur-md sticky top-0 z-10 p-0 flex items-center justify-between px-3 md:px-6 border-b border-gray-100 h-16 md:h-20">
+          <div className="flex items-center gap-2 md:gap-4">
             <Button 
               type="text" 
-              className="lg:hidden flex items-center justify-center" 
-              icon={<MenuIcon size={24} />} 
+              className="lg:hidden flex items-center justify-center p-1" 
+              icon={<MenuIcon size={22} strokeWidth={1.5} />} 
               onClick={() => setMobileMenuOpen(true)}
             />
-            <div className="hidden md:flex items-center bg-gray-50 px-4 py-2 rounded-full border border-gray-100 w-64">
+            <div className="hidden lg:flex items-center bg-gray-50 px-4 py-2 rounded-full border border-gray-100 w-64">
               <Search size={16} className="text-gray-400 mr-2" />
               <input 
                 type="text" 
@@ -140,31 +140,31 @@ const AdminLayout: React.FC = () => {
             </div>
           </div>
           
-          <div className="flex items-center gap-3 md:gap-6">
+          <div className="flex items-center gap-2 md:gap-6">
             <Button 
               type="primary" 
-              className="bg-black hover:!bg-gray-800 border-none rounded-full px-4 md:px-5 text-[10px] md:text-[11px] font-bold uppercase tracking-widest h-10 flex items-center gap-2"
-              icon={<Store size={16} />} 
+              className="bg-black hover:!bg-gray-800 border-none rounded-full px-3 md:px-5 text-[10px] md:text-[11px] font-bold uppercase tracking-widest h-9 md:h-10 flex items-center gap-2"
+              icon={<Store size={14} />} 
               onClick={() => navigate('/')}
             >
-              <span className="hidden xs:inline">Về cửa hàng</span>
+              <span className="hidden sm:inline">Về cửa hàng</span>
             </Button>
 
             <Badge dot color="black" offset={[-2, 2]}>
-              <Button type="text" icon={<Bell size={20} strokeWidth={1.5} />} className="flex items-center justify-center p-2 hover:bg-gray-50 rounded-full" />
+              <Button type="text" icon={<Bell size={18} strokeWidth={1.5} />} className="flex items-center justify-center p-1 md:p-2 hover:bg-gray-50 rounded-full" />
             </Badge>
           </div>
         </Header>
 
-        <Content className="p-4 md:p-8 max-w-[1400px] mx-auto w-full">
-          <div className="mb-6 md:mb-10">
-            <h1 className="text-[24px] md:text-[32px] font-black tracking-tighter uppercase mb-1">
+        <Content className="p-3 md:p-8 max-w-[1400px] mx-auto w-full">
+          <div className="mb-4 md:mb-10">
+            <h1 className="text-[20px] md:text-[32px] font-black tracking-tighter uppercase mb-0 md:mb-1">
               {menuItems.find(item => {
                 const link = (item.label as any)?.props?.to;
                 return link === location.pathname;
               })?.label?.props?.children || "Bảng điều khiển"}
             </h1>
-            <p className="text-gray-400 text-xs md:text-sm">Chào mừng bạn đến với hệ thống quản trị Thai Tien Shop.</p>
+            <p className="text-gray-400 text-[10px] md:text-sm">Chào mừng bạn đến với hệ thống quản trị Thai Tien Shop.</p>
           </div>
           <Outlet />
         </Content>
